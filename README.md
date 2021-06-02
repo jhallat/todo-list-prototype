@@ -1,4 +1,4 @@
-# todo-list-poc
+# To Do List Prototype
 
 ## Project setup
 ```
