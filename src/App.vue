@@ -2,10 +2,10 @@
   <div id="app">
     <div class="todo-list-container">
     <div class="todo-list-container-heading">To Do List</div>
-    <input class="bottom-margin-medium" v-model="newItem"/>
-    <button class="left-margin-small" @click="onAddItem">Add</button>
-    <div v-for="item in todo" :key="item.id">
-      <input type="checkbox" :value="item.completed">
+    <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
+    <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
+    <div v-for="(item, index) in todo" :key="item.id">
+      <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
       {{ item.description }}
     </div>
     </div>
@@ -13,38 +13,47 @@
 </template>
 
 <script>
+import {data} from './shared/data';
 
 export default {
   name: 'App',
   components: {},
+  computed: {
+    isAddInvalid() {
+      return this.newItem == undefined || this.newItem.trim().length == 0;
+    }
+  },
   data() {
     return {
       newItem: '',
-      todo: [
-        {
-          id: 1,
-          timestamp: '20210530',
-          description: 'Clean Kitchen',
-          completed: false
-        },
-        {
-          id: 2,
-          timestamp: '20210530',
-          description: 'Pack Electronics',
-         completed: false
-        }
-      ]
+      todo: []
     }
   },
+  async created() {
+    await this.loadToDo();
+  },
   methods: {
-    onAddItem() {
-      this.todo.push({id: 0, description: this.newItem, timestamp: '', completed: false})
+    async onAddItemEnter(event) {
+      if (event.keyCode == 13 && this.newItem != undefined && this.newItem.trim().length > 0) {
+        await this.onAddItem();
+      }
+    },
+    async loadToDo() {
+      this.todo = await data.getToDo();
+    },
+    async onAddItem() {
+      let addedItem = await data.addToDo(this.newItem);
+      this.todo.push(addedItem);
+      this.newItem = '';
+    },
+    async onChangeCompletion(index) {
+      await data.changeToDoCompletion(this.todo[index].id, this.todo[index].completed);
     }
   }
 }
 </script>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -62,8 +71,16 @@ button {
   color: #2c3e50;
 }
 
+button:disabled {
+  color: #cccccc;
+}
+
 button:hover {
   background-color: #eeeeee;
+}
+
+button:hover:disabled {
+  background-color: #ffffff;
 }
 
 .left-margin-small {
