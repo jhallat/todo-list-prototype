@@ -1,105 +1,86 @@
 <template>
   <div id="app">
-    <div class="todo-list-container">
-    <div class="todo-list-container-heading">To Do List</div>
-    <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
-    <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-    <div v-for="(item, index) in todo" :key="item.id">
-      <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
-      {{ item.description }}
-    </div>
-    </div>
+    <header>
+      <img class="logo" src="./assets/to-do-logo-v2.svg">
+      Get Everything Done !!!
+    </header>
+    <nav>
+
+    </nav>
+    <main>
+      <!-- <Group/> -->
+      <ToDoList/>
+    </main>
+    <footer>
+
+    </footer>
   </div>
 </template>
 
 <script>
-import {data} from './shared/data';
+import ToDoList from '@/components/to-do-list';
+//import Group from '@/components/group';
 
 export default {
   name: 'App',
-  components: {},
-  computed: {
-    isAddInvalid() {
-      return this.newItem == undefined || this.newItem.trim().length == 0;
-    }
+  components: {
+    //Group,
+    ToDoList
   },
-  data() {
-    return {
-      newItem: '',
-      todo: []
-    }
-  },
-  async created() {
-    await this.loadToDo();
-  },
-  methods: {
-    async onAddItemEnter(event) {
-      if (event.keyCode == 13 && this.newItem != undefined && this.newItem.trim().length > 0) {
-        await this.onAddItem();
-      }
-    },
-    async loadToDo() {
-      this.todo = await data.getToDo();
-    },
-    async onAddItem() {
-      let addedItem = await data.addToDo(this.newItem);
-      this.todo.push(addedItem);
-      this.newItem = '';
-    },
-    async onChangeCompletion(index) {
-      await data.changeToDoCompletion(this.todo[index].id, this.todo[index].completed);
-    }
-  }
 }
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,500;1,400&display=swap');
+@import 'shared/style/theme.scss';
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  background-color: $alternate-color-light;
+}
+
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Ubuntu, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: black;
-  margin-top: 60px;
 }
 
-button {
-  border: none;
-  border-radius: 3px;
-  padding: 5px;
-  background-color: white;
-  color: #2c3e50;
+header {
+  display: flex;
+  align-items: center;
+  background-color: $primary-color;
+  color: white;
+  font-size: 18px;
+  font-style: italic;
+  .logo {
+    width: 25px;
+    margin-right: 10px;
+  }
+  margin: auto;
+  padding: 10px;
+  @media only screen and (min-width: 768px) {
+    font-size: 22px;
+    .logo {
+      width: 45px;
+      margin-right: 10px;
+    }
+  }
 }
 
-button:disabled {
-  color: #cccccc;
+@media only screen and (min-width: 768px) {
+
 }
 
-button:hover {
-  background-color: #eeeeee;
+@media only screen and (min-width: 1024px) {
+
 }
 
-button:hover:disabled {
-  background-color: #ffffff;
-}
-
-.left-margin-small {
-  margin-left: 10px;
-}
-
-.bottom-margin-small {
-  margin-bottom: 10px;
-}
-
-.bottom-margin-medium {
-  margin-bottom: 20px;
-}
-
-.todo-list-container {
-  text-align: left;
-}
-
-.todo-list-container-heading {
-  font-weight: bold;
-}
 </style>

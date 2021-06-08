@@ -1,0 +1,31 @@
+$primary-color: #2E94FF;
+$primary-color-dark: darken($primary-color, 15%);
+$primary-color-x-dark: darken($primary-color, 30%);
+$primary-color-xx-dark: darken($primary-color, 45%);
+
+$accent-color: #B7FEE7;
+
+$alternate-color: #AFFF7F;
+$alternate-color-light: lighten(#AFFF7F, 10%);
+
+@mixin container($width) {
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  border-top: solid 1px $primary-color-dark;
+  border-bottom: solid 1px $primary-color-dark;
+  background-color: white;
+  @media only screen and (min-width: $width + 20) {
+    width: $width;
+    border: solid 1px $primary-color-dark;
+    border-radius: 5px;
+    margin: 10px auto auto;
+  }
+
+}
+
+@mixin container-heading {
+  color: $primary-color-xx-dark;
+  font-weight: bold;
+  margin-bottom: 10px;
+}

@@ -29,6 +29,11 @@ const changeToDoCompletion = async function(id, completed) {
     return response.status == 204;
 }
 
+const deleteToDo = async function(id) {
+    const response = await axios.delete(`${API}/api/todo/${id}`);
+    return response.status == 204;
+}
+
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
     if (!response.data) return [];
@@ -43,5 +48,6 @@ const parseList = response => {
 export const data = {
     getToDo,
     addToDo,
-    changeToDoCompletion
+    changeToDoCompletion,
+    deleteToDo
 }
