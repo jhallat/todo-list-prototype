@@ -1,18 +1,22 @@
 <template>
-  <div class="todo-list-container">
-    <div class="todo-list-container-heading">To Do List</div>
-    <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
-    <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-    <div class="todo-item" v-for="(item, index) in todo" :key="item.id">
-      <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
-      {{ item.description }}
-      <button class="left-margin-small" @click="onDeleteItem(index)">Delete</button>
+  <div class="row">
+    <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
+      <div class="todo-list-container-heading">To Do List</div>
+      <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
+      <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
+      <div class="row">
+        <div class="todo-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
+          <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
+          {{ item.description }}
+          <button class="left-margin-small" @click="onDeleteItem(index)">Delete</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import {data} from '../shared/data';
+import {todoData} from '../shared/todo-data';
 
 export default {
   name: 'ToDoList',
@@ -38,18 +42,18 @@ export default {
       }
     },
     async loadToDo() {
-      this.todo = await data.getToDo();
+      this.todo = await todoData.getToDo();
     },
     async onAddItem() {
-      let addedItem = await data.addToDo(this.newItem);
+      let addedItem = await todoData.addToDo(this.newItem);
       this.todo.push(addedItem);
       this.newItem = '';
     },
     async onChangeCompletion(index) {
-      await data.changeToDoCompletion(this.todo[index].id, this.todo[index].completed);
+      await todoData.changeToDoCompletion(this.todo[index].id, this.todo[index].completed);
     },
     async onDeleteItem(index) {
-      await data.deleteToDo(this.todo[index].id);
+      await todoData.deleteToDo(this.todo[index].id);
       this.todo.splice(index, 1);
     }
   }
@@ -58,7 +62,7 @@ export default {
 
 <style lang="scss">
 
-@import '../shared/style/theme.scss';
+@import '../shared/style/theme';
 
 button {
   border: none;
@@ -79,6 +83,7 @@ button {
     }
   }
 }
+
 
 .left-margin-small {
   margin-left: 10px;
@@ -112,10 +117,15 @@ button {
 }
 
 .todo-list-container {
-  @include container(350px);
+  @include container;
   text-align: left;
   width: 100%;
-  margin: auto;
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .todo-list-container-heading {

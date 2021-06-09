@@ -1,25 +1,77 @@
+$medium: 768px;
+$large: 1080px;
+
 $primary-color: #2E94FF;
+$primary-color-light: lighten($primary-color, 10%);
 $primary-color-dark: darken($primary-color, 15%);
 $primary-color-x-dark: darken($primary-color, 30%);
 $primary-color-xx-dark: darken($primary-color, 45%);
 
 $accent-color: #B7FEE7;
+$accent-color-dark: darken(#B7FEE7, 15%);
 
 $alternate-color: #AFFF7F;
 $alternate-color-light: lighten(#AFFF7F, 10%);
+$alternate-color-x-light: lighten(#AFFF7F, 20%);
 
-@mixin container($width) {
-  padding: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  border-top: solid 1px $primary-color-dark;
-  border-bottom: solid 1px $primary-color-dark;
+.row {
+  clear: both;
+}
+
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+
+.max-height {
+  height: 100%;
+}
+
+
+@for $i from 1 through 12 {
+  .col-sm-#{$i} {
+    width: round(100% * $i/12);
+    float: left;
+  }
+  .offset-sm-#{$i} {
+    margin-left: round(100% * $i/12);
+  }
+}
+
+@media only screen and (min-width: $medium) {
+  @for $i from 1 through 12 {
+    .col-md-#{$i} {
+      width: round(100% * $i/12);
+      float: left;
+    }
+    .offset-md-#{$i} {
+      margin-left: round(100% * $i/12);
+    }
+  }
+}
+
+@media only screen and (min-width: $large) {
+  @for $i from 1 through 12 {
+    .col-lg-#{$i} {
+      width: round(100% * $i/12);
+      float: left;
+    }
+    .offset-lg-#{$i} {
+      margin-left: round(100% * $i/12);
+    }
+  }
+}
+
+@mixin container() {
+  padding: 20px;
+  margin-top: 10px;
+  border: solid 1px $primary-color-dark;
   background-color: white;
-  @media only screen and (min-width: $width + 20) {
-    width: $width;
-    border: solid 1px $primary-color-dark;
+  @media only screen and (min-width: $large) {
     border-radius: 5px;
-    margin: 10px auto auto;
   }
 
 }

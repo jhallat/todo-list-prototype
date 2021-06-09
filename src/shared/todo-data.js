@@ -45,7 +45,7 @@ const parseList = response => {
 }
 
 
-export const data = {
+export const todoData = {
     getToDo,
     addToDo,
     changeToDoCompletion,
