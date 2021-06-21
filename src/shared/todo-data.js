@@ -1,9 +1,9 @@
 import * as axios from 'axios';
-import { API } from './config';
+import { TODO_API } from './config';
 
 const getToDo = async function() {
     try {
-        const response = await axios.get(`${API}/api/todo`);
+        const response = await axios.get(`${TODO_API}/api/todo/today`);
         let data = parseList(response);
         return data;
     } catch (error) {
@@ -13,16 +13,15 @@ const getToDo = async function() {
 }
 
 const addToDo = async function(description) {
-    const response = await axios.post(`${API}/api/todo`,
+    const response = await axios.post(`${TODO_API}/api/todo`,
         {
             description
         })
-    console.log(response.data);
     return response.data;
 }
 
 const changeToDoCompletion = async function(id, completed) {
-    const response = await axios.put(`${API}/api/todo/${id}/completed`,
+    const response = await axios.put(`${TODO_API}/api/todo/${id}/completed`,
         {
             completed
         })
@@ -30,7 +29,7 @@ const changeToDoCompletion = async function(id, completed) {
 }
 
 const deleteToDo = async function(id) {
-    const response = await axios.delete(`${API}/api/todo/${id}`);
+    const response = await axios.delete(`${TODO_API}/api/todo/${id}`);
     return response.status == 204;
 }
 

@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { goalData } from "@/shared/goal-data";
+
 export default {
   name: 'Goals',
   components: {
@@ -31,9 +33,13 @@ export default {
       goals: []
     }
   },
+  async created() {
+    await this.loadGoals();
+  },
   methods: {
-    onAddItem() {
-      this.goals.push({id:0, description: this.newItem });
+    async onAddItem() {
+      let addedGoal = await goalData.addGoal(this.newItem);
+      this.goals.push(addedGoal);
       this.newItem = '';
     },
     onAddItemEnter(event) {
@@ -41,8 +47,12 @@ export default {
         this.onAddItem();
       }
     },
-    onDeleteItemteItem(index) {
+    async onDeleteItem(index) {
+      await goalData.deleteGoal(this.goals[index].id);
       this.goals.splice(index, 1);
+    },
+    async loadGoals() {
+      this.goals = await goalData.getGoals();
     }
   }
 }

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import ToDoList from '../views/to-do-list'
 import Goals from '../views/goals'
+import Tasks from '../views/tasks'
 
 Vue.use(VueRouter)
 
@@ -19,6 +20,11 @@ const routes = [
     path: '/goals',
     name: 'goals',
     component: Goals
+  },
+  {
+    path: '/tasks',
+    name: 'tasks',
+    component: Tasks
   },
 ]
 

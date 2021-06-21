@@ -9,6 +9,7 @@
           <ul v-bind:class="{ open: isMenuOpen }">
             <li><router-link @click.native="onMenuToggle" to="/to-do-list">To Do List</router-link></li>
             <li><router-link @click.native="onMenuToggle" to="/goals">Goals</router-link></li>
+            <li><router-link @click.native="onMenuToggle" to="/tasks">Tasks</router-link></li>
           </ul>
         </nav>
         <router-view/>
