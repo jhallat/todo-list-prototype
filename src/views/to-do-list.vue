@@ -50,7 +50,9 @@ export default {
       this.newItem = '';
     },
     async onChangeCompletion(index) {
-      await todoData.changeToDoCompletion(this.todo[index].id, this.todo[index].completed);
+      await todoData.changeToDoCompletion(this.todo[index].id,
+          this.todo[index].completed,
+          this.todo[index].taskId);
     },
     async onDeleteItem(index) {
       await todoData.deleteToDo(this.todo[index].id);

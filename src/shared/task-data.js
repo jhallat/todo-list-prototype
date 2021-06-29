@@ -12,12 +12,17 @@ const getTasks = async function(goalId) {
     }
 }
 
-const addTask = async function(goalId, description) {
-    const response = await axios.post(`${TASK_API}/tasks`,
-        {
-            goalId,
-            description
-        })
+/*
+    Adds a task to the repository
+    New tasks are formatted as follows:
+    {
+        goalId (numeric),
+        description (string),
+        isOngoing (boolean)
+    }
+ */
+const addTask = async function(newTask) {
+    const response = await axios.post(`${TASK_API}/tasks`, newTask)
     return response.data;
 }
 

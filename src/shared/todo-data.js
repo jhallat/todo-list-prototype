@@ -12,18 +12,20 @@ const getToDo = async function() {
     }
 }
 
-const addToDo = async function(description) {
+const addToDo = async function(description, taskId = 0) {
     const response = await axios.post(`${TODO_API}/api/todo`,
         {
-            description
+            description,
+            taskId
         })
     return response.data;
 }
 
-const changeToDoCompletion = async function(id, completed) {
+const changeToDoCompletion = async function(id, completed, taskId) {
     const response = await axios.put(`${TODO_API}/api/todo/${id}/completed`,
         {
-            completed
+            completed,
+            taskId
         })
     return response.status == 204;
 }
