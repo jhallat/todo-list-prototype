@@ -12,11 +12,12 @@ const getToDo = async function() {
     }
 }
 
-const addToDo = async function(description, taskId = 0) {
+const addToDo = async function(description, taskId = 0, quantity = 1) {
     const response = await axios.post(`${TODO_API}/api/todo`,
         {
             description,
-            taskId
+            taskId,
+            quantity
         })
     return response.data;
 }
@@ -28,6 +29,15 @@ const changeToDoCompletion = async function(id, completed, taskId) {
             taskId
         })
     return response.status == 204;
+}
+
+const adjustQuantity = async function(id, adjustment) {
+    const response = await axios.post(`${TODO_API}/api/todo/quantity-adjustment`,
+        {
+            id,
+            adjustment
+        })
+    return response.data;
 }
 
 const deleteToDo = async function(id) {
@@ -50,5 +60,6 @@ export const todoData = {
     getToDo,
     addToDo,
     changeToDoCompletion,
-    deleteToDo
+    deleteToDo,
+    adjustQuantity
 }

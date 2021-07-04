@@ -18,12 +18,28 @@ const getTasks = async function(goalId) {
     {
         goalId (numeric),
         description (string),
-        isOngoing (boolean)
+        isOngoing (boolean),
+        isQuantifiable (boolean)
     }
  */
 const addTask = async function(newTask) {
-    const response = await axios.post(`${TASK_API}/tasks`, newTask)
+    const response = await axios.post(`${TASK_API}/tasks`, newTask);
     return response.data;
+}
+
+const deleteTask = async function(id) {
+    const response = await axios.delete(`${TASK_API}/tasks/${id}`);
+    return response.status = 204;
+}
+
+const updateTask = async function(updatedTask) {
+    const response = await axios.put(`${TASK_API}/tasks/${updatedTask.id}`,
+        {
+            description: updatedTask.description,
+            isOngoing: updatedTask.isOngoing,
+            isQuantifiable: updatedTask.isQuantifiable
+        })
+    return response.status = 204;
 }
 
 const parseList = response => {
@@ -38,5 +54,7 @@ const parseList = response => {
 
 export const taskData = {
     getTasks,
-    addTask
+    addTask,
+    deleteTask,
+    updateTask
 }

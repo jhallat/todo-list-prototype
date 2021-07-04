@@ -6,8 +6,14 @@
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
       <div class="row">
         <div class="todo-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
-          <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
-          {{ item.description }}
+          <div v-if="item.quantity <= 1" class="todo-input">
+            <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
+          </div>
+          <div v-if="item.quantity > 1" class="todo-input">
+            <input type="text" placeholder="1" v-model="item.adjustment" />
+            <button class="adjust-button" @click="onAdjust(index)">-</button>
+          </div>
+          <span v-if="item.quantity > 1">{{item.quantity}}</span>&nbsp;{{ item.description }}
           <button class="left-margin-small" @click="onDeleteItem(index)">Delete</button>
         </div>
       </div>
@@ -42,7 +48,8 @@ export default {
       }
     },
     async loadToDo() {
-      this.todo = await todoData.getToDo();
+      const response  = await todoData.getToDo();
+      this.todo = response.map(item => Object.assign({}, item, {adjustment:''}));
     },
     async onAddItem() {
       let addedItem = await todoData.addToDo(this.newItem);
@@ -57,6 +64,17 @@ export default {
     async onDeleteItem(index) {
       await todoData.deleteToDo(this.todo[index].id);
       this.todo.splice(index, 1);
+    },
+    async onAdjust(index) {
+      const id = this.todo[index].id;
+      let adjustment = this.todo[index].adjustment;
+      if (adjustment === '') {
+         adjustment = 1;
+      }
+      const response = await todoData.adjustQuantity(id, adjustment);
+      this.todo[index].quantity = response.quantity;
+      this.todo[index].completed = response.completed;
+      this.todo[index].adjustment = '';
     }
   }
 }
@@ -65,6 +83,10 @@ export default {
 <style lang="scss">
 
 @import '../shared/style/theme';
+
+input::placeholder {
+  color: #333333;
+}
 
 button {
   border: none;
@@ -99,7 +121,39 @@ button {
   margin-bottom: 20px;
 }
 
+.todo-input {
+  margin-right: 5px;
+
+  input[type=text] {
+    width: 40px;
+    border: 1px solid #888888;
+    border-radius: 2px 0px 0px 2px;
+  }
+
+  .adjust-button {
+    visibility: visible;
+    background-color: $primary-color;
+    color: white;
+    width: 20px;
+    height: 23px;
+    font-weight: bold;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+    border: 1px solid #888888;
+    border-left: none;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover:active {
+      background-color: $primary-color-dark;
+    }
+  }
+}
+
 .todo-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 5px;
   border-radius: 5px;
 
