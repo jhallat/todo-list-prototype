@@ -3,7 +3,7 @@ import { TODO_API } from './config';
 
 const getToDo = async function() {
     try {
-        const response = await axios.get(`${TODO_API}/api/todo/today`);
+        const response = await axios.get(`${TODO_API}/todo/today`);
         let data = parseList(response);
         return data;
     } catch (error) {
@@ -13,7 +13,7 @@ const getToDo = async function() {
 }
 
 const addToDo = async function(description, taskId = 0, quantity = 1) {
-    const response = await axios.post(`${TODO_API}/api/todo`,
+    const response = await axios.post(`${TODO_API}/todo`,
         {
             description,
             taskId,
@@ -23,7 +23,7 @@ const addToDo = async function(description, taskId = 0, quantity = 1) {
 }
 
 const changeToDoCompletion = async function(id, completed, taskId) {
-    const response = await axios.put(`${TODO_API}/api/todo/${id}/completed`,
+    const response = await axios.put(`${TODO_API}/todo/${id}/completed`,
         {
             completed,
             taskId
@@ -32,7 +32,7 @@ const changeToDoCompletion = async function(id, completed, taskId) {
 }
 
 const adjustQuantity = async function(id, adjustment) {
-    const response = await axios.post(`${TODO_API}/api/todo/quantity-adjustment`,
+    const response = await axios.post(`${TODO_API}/todo/quantity-adjustment`,
         {
             id,
             adjustment
@@ -41,7 +41,15 @@ const adjustQuantity = async function(id, adjustment) {
 }
 
 const deleteToDo = async function(id) {
-    const response = await axios.delete(`${TODO_API}/api/todo/${id}`);
+    const response = await axios.delete(`${TODO_API}/todo/${id}`);
+    return response.status == 204;
+}
+
+const snoozeToDo = async function(id, days) {
+    const response = await axios.post(`${TODO_API}/todo/${id}/snooze`,
+        {
+            days
+        });
     return response.status == 204;
 }
 
@@ -61,5 +69,6 @@ export const todoData = {
     addToDo,
     changeToDoCompletion,
     deleteToDo,
-    adjustQuantity
+    adjustQuantity,
+    snoozeToDo
 }

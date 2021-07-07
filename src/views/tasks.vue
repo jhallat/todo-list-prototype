@@ -265,14 +265,6 @@ label {
   margin-left: 10px;
 }
 
-.button-bar {
-  margin-left: 10px;
-  button {
-    padding-bottom: 0px;
-    padding-top: 0px;
-  }
-}
-
 .goal-selection {
   margin-bottom: 15px;
 }

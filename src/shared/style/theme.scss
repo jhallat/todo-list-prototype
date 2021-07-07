@@ -77,7 +77,25 @@ $alternate-color-x-light: lighten(#AFFF7F, 20%);
 }
 
 @mixin container-heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+@mixin container-heading-menu-item {
+  font-size: 0.95rem;
+}
+
+@mixin container-heading-title {
   color: $primary-color-xx-dark;
   font-weight: bold;
-  margin-bottom: 10px;
+}
+
+.button-bar {
+  margin-left: 10px;
+  button {
+    padding-bottom: 0px;
+    padding-top: 0px;
+  }
 }

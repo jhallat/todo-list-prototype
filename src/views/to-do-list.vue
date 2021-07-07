@@ -1,7 +1,12 @@
 <template>
   <div class="row">
     <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
-      <div class="todo-list-container-heading">To Do List</div>
+      <div class="todo-list-container-heading">
+        <div class="todo-list-container-heading-title">To Do List</div>
+        <div class="button-bar">
+          <button @click="loadToDo">Refresh</button>
+        </div>
+      </div>
       <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
       <div class="row">
@@ -14,6 +19,7 @@
             <button class="adjust-button" @click="onAdjust(index)">-</button>
           </div>
           <span v-if="item.quantity > 1">{{item.quantity}}</span>&nbsp;{{ item.description }}
+          <button class="left-margin-small" @click="onSnoozeItem(index)">Snooze</button>
           <button class="left-margin-small" @click="onDeleteItem(index)">Delete</button>
         </div>
       </div>
@@ -22,7 +28,7 @@
 </template>
 
 <script>
-import {todoData} from '../shared/todo-data';
+import {todoData} from '../shared';
 
 export default {
   name: 'ToDoList',
@@ -53,6 +59,7 @@ export default {
     },
     async onAddItem() {
       let addedItem = await todoData.addToDo(this.newItem);
+      addedItem.quantity = 1;
       this.todo.push(addedItem);
       this.newItem = '';
     },
@@ -63,6 +70,10 @@ export default {
     },
     async onDeleteItem(index) {
       await todoData.deleteToDo(this.todo[index].id);
+      this.todo.splice(index, 1);
+    },
+    async onSnoozeItem(index) {
+      await todoData.snoozeToDo(this.todo[index].id, 1);
       this.todo.splice(index, 1);
     },
     async onAdjust(index) {
@@ -186,6 +197,10 @@ button {
 
 .todo-list-container-heading {
   @include container-heading;
+}
+
+.todo-list-container-heading-title {
+  @include container-heading-title;
 }
 
 input[type=checkbox] {
