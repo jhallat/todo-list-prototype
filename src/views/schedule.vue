@@ -7,15 +7,15 @@
       <div class="input-line bottom-margin-medium">
         <div>
           <label>Description</label>
-          <input />
+          <input v-model="newSchedule.description"/>
         </div>
-        <DaySelector></DaySelector>
-        <button>Add</button>
+        <DaySelector :selected-days="newSchedule.selectedDays"></DaySelector>
+        <button @click="onAddSchedule">Add</button>
       </div>
       <div class="row schedule-content">
         <div class="schedule-item" v-for="(schedule) in schedules" :key="schedule.id">
           {{schedule.description}}(
-          <DayDisplay></DayDisplay>)
+          <DayDisplay :selected-days="schedule.selectedDays"></DayDisplay>)
         </div>
       </div>
     </div>
@@ -31,6 +31,18 @@ export default {
   components: {DayDisplay, DaySelector},
   data() {
     return {
+      newSchedule: {
+        description: '',
+        selectedDays: {
+          sunday: false,
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
+          saturday: false
+        }
+      },
       schedules: []
     }
   },
@@ -41,6 +53,13 @@ export default {
     async loadSchedule() {
       this.schedules = await scheduleData.getSchedules();
       console.log(this.schedules)
+    },
+    async onAddSchedule() {
+      const response = await scheduleData.addSchedule(this.newSchedule)
+      console.log(response)
+      if (response != null) {
+        this.schedules.push(response);
+      }
     }
   }
 }

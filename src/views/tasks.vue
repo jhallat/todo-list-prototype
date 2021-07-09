@@ -41,6 +41,8 @@
           <button :disabled="isNotActionable" @click="onAddToToDo">Add to To Do List</button>
           |
           <button :disabled="isNotActionable" @click="onDeleteItem">Delete</button>
+          |
+          <button :disabled="isNotActionable" @click="onOpenScheduleDialog">Schedule</button>
         </div>
         </div>
         <div class="row">
@@ -78,11 +80,15 @@
         </div>
       </div>
     </div>
+    <div v-if="displayScheduleDialog">
+      <ScheduleDialog :schedules="schedules" @dialogOk="onScheduleSelect" @dialogCancel="onScheduleCancel"></ScheduleDialog>
+    </div>
   </div>
 </template>
 
 <script>
-import {goalData, taskData, todoData} from "@/shared";
+import {goalData, taskData, todoData, scheduleData} from "@/shared";
+import ScheduleDialog from "@/components/schedule-dialog";
 
 const EMPTY_TASK = {
   description: '',
@@ -92,7 +98,7 @@ const EMPTY_TASK = {
 
 export default {
   name: 'Tasks',
-  components: {},
+  components: {ScheduleDialog},
   computed: {
     isAddInvalid() {
       return this.newTask === undefined || this.newTask.description.trim().length === 0;
@@ -115,19 +121,33 @@ export default {
       pendingTasks: [],
       inProgressTasks: [],
       completedTasks: [],
+      schedules: [],
       editMode: false,
       editTask: {
         id: 0,
         description: '',
         isOngoing: false,
         isQuantifiable: false
-      }
+      },
+      displayScheduleDialog: false
     }
   },
   async created() {
     await this.loadGoals();
   },
   methods: {
+    async onOpenScheduleDialog() {
+      this.schedules = await scheduleData.getSchedules();
+      console.log(this.schedules)
+      this.displayScheduleDialog = true;
+    },
+    onScheduleSelect(scheduleId) {
+      console.log(scheduleId);
+      this.displayScheduleDialog = false;
+    },
+    onScheduleCancel() {
+      this.displayScheduleDialog = false;
+    },
     async onAddItem() {
       let addedTask = await taskData.addTask(
           {
@@ -212,7 +232,6 @@ export default {
       this.goals = await goalData.getGoals();
     },
     async onSelectedGoal() {
-      console.log(this.selectedGoal)
       const tasks = await taskData.getTasks(this.selectedGoal);
       this.pendingTasks = tasks
           .filter(task => task.status.key === 'PENDING')

@@ -38,7 +38,7 @@ export default {
   flex-direction: row;
 }
 .day {
-  color: #888888;
+  color: #cccccc;
 }
 
 .selected {

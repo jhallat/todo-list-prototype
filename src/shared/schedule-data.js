@@ -12,6 +12,21 @@ const getSchedules = async function() {
     }
 }
 
+const addSchedule = async function(schedule) {
+    try {
+        const response = await axios.post(`${SCHEDULE_API}/schedules`,
+            {
+                id: 0,
+                description: schedule.description,
+                selectedDays: schedule.selectedDays
+            })
+        return response.data
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
     if (!response.data) return [];
@@ -23,5 +38,6 @@ const parseList = response => {
 }
 
 export const scheduleData = {
-    getSchedules
+    getSchedules,
+    addSchedule
 }
