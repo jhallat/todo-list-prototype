@@ -1,6 +1,7 @@
 # To Do List Prototype
 
 This application is a prototype UI for managing personal tasks. A map of related services can be found here [To Do Application Map](to-do-application-map.html)
+<img src="./to-do-application-map.svg">
 
 ## Project setup
 ```
