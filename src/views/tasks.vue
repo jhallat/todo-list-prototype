@@ -142,7 +142,13 @@ export default {
       this.displayScheduleDialog = true;
     },
     onScheduleSelect(scheduleId) {
-      console.log(scheduleId);
+      console.log(`scheduledId = ${scheduleId}`);
+      this.pendingTasks
+          .filter(task => task.selected)
+          .forEach((task) => {
+            scheduleData.addTask(scheduleId, task.id, task.description,  parseInt(task.quantity));
+          });
+      this.pendingTasks.forEach(task => task.selected = false);
       this.displayScheduleDialog = false;
     },
     onScheduleCancel() {

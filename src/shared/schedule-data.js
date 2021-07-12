@@ -6,6 +6,17 @@ const getSchedules = async function() {
         const response = await axios.get(`${SCHEDULE_API}/schedules`)
         let data = parseList(response);
         return data;
+
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+const getTasks = async function(scheduleId) {
+    try {
+        const response = await axios.get(`${SCHEDULE_API}/scheduled-task/${scheduleId}`)
+        return parseList(response);
     } catch (error) {
         console.error(error);
         return [];
@@ -27,6 +38,22 @@ const addSchedule = async function(schedule) {
     }
 }
 
+const addTask = async function(scheduleId, taskId, taskDescription, taskQuantity) {
+    try {
+        const response = await axios.post(`${SCHEDULE_API}/scheduled-task`,
+            {
+                scheduleId,
+                taskId,
+                taskDescription,
+                taskQuantity
+            })
+        return response.status = 201;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
     if (!response.data) return [];
@@ -39,5 +66,7 @@ const parseList = response => {
 
 export const scheduleData = {
     getSchedules,
-    addSchedule
+    addSchedule,
+    addTask,
+    getTasks
 }

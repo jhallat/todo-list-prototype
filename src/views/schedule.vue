@@ -14,8 +14,16 @@
       </div>
       <div class="row schedule-content">
         <div class="schedule-item" v-for="(schedule) in schedules" :key="schedule.id">
-          {{schedule.description}}(
-          <DayDisplay :selected-days="schedule.selectedDays"></DayDisplay>)
+          <div class="schedule-heading">
+            {{ schedule.description }}(
+            <DayDisplay :selected-days="schedule.selectedDays"></DayDisplay>
+            )
+          </div>
+          <div class="task-list">
+            <div v-for="(task) in schedule.tasks" :key="task.taskId">
+              {{ task.taskQuantity }} - {{ task.taskDescription }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -26,6 +34,7 @@
 import {scheduleData} from '../shared';
 import DaySelector from "@/components/day-selector";
 import DayDisplay from "@/components/day-display";
+
 export default {
   name: 'Schedule',
   components: {DayDisplay, DaySelector},
@@ -51,7 +60,13 @@ export default {
   },
   methods: {
     async loadSchedule() {
-      this.schedules = await scheduleData.getSchedules();
+      const schedules = await scheduleData.getSchedules();
+      const schedulesWithTasks = [];
+      for (let i = 0; i < schedules.length; i++) {
+        const tasks = await scheduleData.getTasks(schedules[i].id);
+        schedulesWithTasks.push(Object.assign({}, schedules[i], {tasks}));
+      }
+      this.schedules = schedulesWithTasks;
       console.log(this.schedules)
     },
     async onAddSchedule() {
@@ -60,6 +75,14 @@ export default {
       if (response != null) {
         this.schedules.push(response);
       }
+      this.newSchedule.description = '';
+      this.newSchedule.selectedDays.sunday = false;
+      this.newSchedule.selectedDays.monday = false;
+      this.newSchedule.selectedDays.tuesday = false;
+      this.newSchedule.selectedDays.wednesday = false;
+      this.newSchedule.selectedDays.thursday = false;
+      this.newSchedule.selectedDays.friday = false;
+      this.newSchedule.selectedDays.saturday = false;
     }
   }
 }
@@ -67,6 +90,12 @@ export default {
 
 <style lang="scss">
 @import '../shared/style/theme';
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 5px 15px;
+}
 
 .schedule-container {
   @include container;
@@ -81,9 +110,15 @@ export default {
   @include container-heading-title;
 }
 
-.schedule-item {
+.schedule-heading {
   display: flex;
   flex-direction: row;
+  border-bottom: 1px solid gray;
+}
+
+.schedule-item {
+  display: flex;
+  flex-direction: column;
 }
 
 .input-line {
