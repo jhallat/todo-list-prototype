@@ -31,6 +31,18 @@ const changeToDoCompletion = async function(id, completed, taskId) {
     return response.status == 204;
 }
 
+const getCompletionHistory = async function(start, end) {
+
+    try {
+        const response = await axios.get(`${TODO_API}/todo/history/completed/summary?start=${start}&end=${end}`)
+        let data = parseList(response)
+        return data;
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
 const adjustQuantity = async function(id, adjustment) {
     const response = await axios.post(`${TODO_API}/todo/quantity-adjustment`,
         {
@@ -70,5 +82,6 @@ export const todoData = {
     changeToDoCompletion,
     deleteToDo,
     adjustQuantity,
-    snoozeToDo
+    snoozeToDo,
+    getCompletionHistory
 }

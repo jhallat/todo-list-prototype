@@ -1,4 +1,5 @@
 <template>
+  <div>
   <div class="row">
     <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
       <div class="todo-list-container-heading">
@@ -24,6 +25,14 @@
         </div>
       </div>
     </div>
+    <div class="row">
+      <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
+        <div class="completed-amount">
+          {{ completedCount }} {{ itemsLabel }} completed !!!
+        </div>
+      </div>
+    </div>
+    </div>
   </div>
 </template>
 
@@ -36,6 +45,15 @@ export default {
   computed: {
     isAddInvalid() {
       return this.newItem == undefined || this.newItem.trim().length == 0;
+    },
+    completedCount() {
+      return this.todo.filter(t => t.completed).length;
+    },
+    itemsLabel() {
+      if (this.completedCount == 1) {
+        return 'item'
+      }
+      return 'items'
     }
   },
   data() {
@@ -97,6 +115,11 @@ export default {
 
 input::placeholder {
   color: #333333;
+}
+
+.completed-amount {
+  font-size: 1.5em;
+  font-style: italic;
 }
 
 button {
