@@ -11,7 +11,7 @@
       <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
       <div class="row">
-        <div class="col-sm-12 col-md-6 bottom-margin-small" v-for="(item, index) in todo" :key="item.id">
+        <div class="col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
           <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
                     @delete="onDeleteItem(index)"
                     @snooze="onSnoozeItem(index)"
@@ -93,7 +93,6 @@ export default {
     },
     async loadToDo() {
       this.todo = await todoData.getToDo();
-      console.log(JSON.stringify(this.todo));
     },
     async onAddItem() {
       let addedItem = await todoData.addToDo(this.newItem);

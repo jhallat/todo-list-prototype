@@ -1,15 +1,13 @@
 <template>
   <div class="to-do-item">
-    <div v-if="quantity == 1">
-      <div class="check todo-selected" v-if="selected" @click="toggleSelect()">
-        <font-awesome-icon :icon="['fas', 'check-square']"/>
-      </div>
-      <div class="check todo-unselected" v-else @click="toggleSelect()">
-        <font-awesome-icon :icon="['far', 'square']"/>
-      </div>
+    <div class="check todo-selected" v-if="selected && quantity == 1" @click="toggleSelect()">
+      <font-awesome-icon :icon="['fas', 'check-square']"/>
+    </div>
+    <div class="check todo-unselected" v-if="!selected && quantity == 1" @click="toggleSelect()">
+      <font-awesome-icon :icon="['far', 'square']"/>
     </div>
     <div v-if="quantity > 1" class="todo-input">
-      <input type="text" placeholder="1" v-model="adjustment"/>
+      <input type="text" placeholder="1" maxlength="3" v-model="adjustment"/>
       <button class="adjust-button" @click="onAdjust">-</button>
     </div>
     <div class="item-label">
@@ -106,6 +104,7 @@ export default {
 @import '../shared/style/theme';
 
 .to-do-item {
+  margin-bottom: 3px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -137,7 +136,7 @@ export default {
   font-size: 18px;
   visibility: hidden;
   color: #666666;
-  margin-right: 5px;
+  padding-right: 5px;
 
   &:hover {
     color: $primary-color;
@@ -150,7 +149,7 @@ export default {
 
 .check {
   font-size: 18px;
-  margin-right: 5px;
+  padding-right: 5px;
 }
 
 .todo-unselected {
@@ -162,24 +161,20 @@ export default {
 }
 
 .tooltip {
-  margin-right: 5px;
+  padding-right: 5px;
   font-size: 12px;
 }
 
 .todo-input {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  margin-right: 5px;
+  min-width: 60px;
 
   input[type=text] {
-    width: 40px;
+    width: 35px;
     border: 1px solid #888888;
     border-radius: 2px 0px 0px 2px;
   }
 
   .adjust-button {
-    visibility: visible;
     background-color: $primary-color;
     color: white;
     width: 20px;
