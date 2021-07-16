@@ -1,10 +1,16 @@
 <template>
   <div class="to-do-item">
-    <div class="check todo-selected" v-if="selected" @click="toggleSelect()">
-      <font-awesome-icon :icon="['fas', 'check-square']"/>
+    <div v-if="quantity == 1">
+      <div class="check todo-selected" v-if="selected" @click="toggleSelect()">
+        <font-awesome-icon :icon="['fas', 'check-square']"/>
+      </div>
+      <div class="check todo-unselected" v-else @click="toggleSelect()">
+        <font-awesome-icon :icon="['far', 'square']"/>
+      </div>
     </div>
-    <div class="check todo-unselected" v-else @click="toggleSelect()">
-      <font-awesome-icon :icon="['far', 'square']"/>
+    <div v-if="quantity > 1" class="todo-input">
+      <input type="text" placeholder="1" v-model="adjustment"/>
+      <button class="adjust-button" @click="onAdjust">-</button>
     </div>
     <div class="item-label">
       {{ generateLabel(description, quantity) }}
@@ -48,6 +54,7 @@ export default {
   },
   data() {
     return {
+      adjustment: '',
       showSnooze: false,
       showDelete: false
     }
@@ -87,6 +94,10 @@ export default {
     onSnooze() {
       this.$emit("snooze");
     },
+    onAdjust() {
+      this.$emit("adjust", this.adjustment);
+      this.adjustment = '';
+    }
   }
 }
 </script>
@@ -155,4 +166,39 @@ export default {
   font-size: 12px;
 }
 
+.todo-input {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  margin-right: 5px;
+
+  input[type=text] {
+    width: 40px;
+    border: 1px solid #888888;
+    border-radius: 2px 0px 0px 2px;
+  }
+
+  .adjust-button {
+    visibility: visible;
+    background-color: $primary-color;
+    color: white;
+    width: 20px;
+    height: 23px;
+    font-weight: bold;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+    border: 1px solid #888888;
+    border-left: none;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover:active {
+      background-color: $primary-color-dark;
+    }
+  }
+}
+
+input::placeholder {
+  color: #333333;
+}
 </style>

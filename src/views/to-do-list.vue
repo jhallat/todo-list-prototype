@@ -11,11 +11,13 @@
       <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
       <div class="row">
-        <div class="col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
+        <div class="col-sm-12 col-md-6 bottom-margin-small" v-for="(item, index) in todo" :key="item.id">
           <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
                     @delete="onDeleteItem(index)"
                     @snooze="onSnoozeItem(index)"
-                    @select="onChangeCompletion(index, $event)"></ToDoItem>
+                    @select="onChangeCompletion(index, $event)"
+                    @adjust="onAdjust(index, $event)">
+          </ToDoItem>
          </div>
       </div>
     </div>
@@ -70,25 +72,6 @@ export default {
     await this.loadCompletionHistory();
   },
   methods: {
-    generateLabel(description, quantity) {
-      if (description.includes('#')) {
-        const temp = description.replace('#', quantity);
-        if (temp.includes(`(s)`)) {
-          if (quantity == 1) {
-            return temp.replace(`(s)`, '');
-          } else {
-            return temp.replace(`(s)`, 's');
-          }
-        } else {
-          return temp;
-        }
-      } else {
-        if (quantity == 1) {
-          return description;
-        }
-        return `${quantity} ${description}`
-      }
-    },
     async loadCompletionHistory() {
       const currentDate = new Date();
       const start = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -7));
@@ -109,8 +92,8 @@ export default {
       }
     },
     async loadToDo() {
-      const response  = await todoData.getToDo();
-      this.todo = response.map(item => Object.assign({}, item, {adjustment:''}));
+      this.todo = await todoData.getToDo();
+      console.log(JSON.stringify(this.todo));
     },
     async onAddItem() {
       let addedItem = await todoData.addToDo(this.newItem);
@@ -132,16 +115,14 @@ export default {
       await todoData.snoozeToDo(this.todo[index].id, 1);
       this.todo.splice(index, 1);
     },
-    async onAdjust(index) {
+    async onAdjust(index, adjustment) {
       const id = this.todo[index].id;
-      let adjustment = this.todo[index].adjustment;
       if (adjustment === '') {
          adjustment = 1;
       }
       const response = await todoData.adjustQuantity(id, adjustment);
       this.todo[index].quantity = response.quantity;
       this.todo[index].completed = response.completed;
-      this.todo[index].adjustment = '';
     }
   }
 }
@@ -172,9 +153,6 @@ export default {
   justify-content: center;
 }
 
-input::placeholder {
-  color: #333333;
-}
 
 .completed-amount {
   font-size: 1.5em;
@@ -214,36 +192,9 @@ button {
   margin-bottom: 20px;
 }
 
-.todo-input {
-  margin-right: 5px;
 
-  input[type=text] {
-    width: 40px;
-    border: 1px solid #888888;
-    border-radius: 2px 0px 0px 2px;
-  }
 
-  .adjust-button {
-    visibility: visible;
-    background-color: $primary-color;
-    color: white;
-    width: 20px;
-    height: 23px;
-    font-weight: bold;
-    border-bottom-left-radius: 0px;
-    border-top-left-radius: 0px;
-    border: 1px solid #888888;
-    border-left: none;
-    display: inline-flex;
-    align-items: center;
-
-    &:hover:active {
-      background-color: $primary-color-dark;
-    }
-  }
-}
-
-.todo-item {
+/* .todo-item {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -263,7 +214,7 @@ button {
       visibility: visible;
     }
   }
-}
+} */
 
 .todo-list-container {
   @include container;
