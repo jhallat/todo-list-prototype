@@ -11,24 +11,24 @@
       <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
       <div class="row">
-        <div class="todo-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
-          <div v-if="item.quantity <= 1" class="todo-input">
-            <input type="checkbox" v-model="item.completed" @change="onChangeCompletion(index)">
-          </div>
-          <div v-if="item.quantity > 1" class="todo-input">
-            <input type="text" placeholder="1" v-model="item.adjustment" />
-            <button class="adjust-button" @click="onAdjust(index)">-</button>
-          </div>
-          <span v-if="item.quantity > 1">{{item.quantity}}</span>&nbsp;{{ item.description }}
-          <button class="left-margin-small" @click="onSnoozeItem(index)">Snooze</button>
-          <button class="left-margin-small" @click="onDeleteItem(index)">Delete</button>
-        </div>
+        <div class="col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
+          <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
+                    @delete="onDeleteItem(index)"
+                    @snooze="onSnoozeItem(index)"
+                    @select="onChangeCompletion(index, $event)"></ToDoItem>
+         </div>
       </div>
     </div>
     <div class="row">
       <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
         <div class="completed-amount">
-          {{ completedCount }} {{ itemsLabel }} completed !!!
+          {{ completedLabel }}
+        </div>
+        <div class="row">
+          <div class="history-box" v-for="(history) in completionHistory" :key="history.index">
+            <div class="history-day">{{ history.day }}</div>
+            <div class="history-count">{{ history.count }}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -37,35 +37,72 @@
 </template>
 
 <script>
-import {todoData} from '../shared';
+import {todoData, dateTools} from '../shared';
+import ToDoItem from "@/components/to-do-item";
 
 export default {
   name: 'ToDoList',
-  components: {},
+  components: {ToDoItem},
   computed: {
     isAddInvalid() {
       return this.newItem == undefined || this.newItem.trim().length == 0;
     },
-    completedCount() {
-      return this.todo.filter(t => t.completed).length;
-    },
-    itemsLabel() {
-      if (this.completedCount == 1) {
-        return 'item'
+    completedLabel() {
+      const finished = this.todo.filter(t => t.completed).length;
+      if (finished == 0) {
+        return "Just getting started !!!";
       }
-      return 'items'
-    }
+      if (finished == 1) {
+        return "1 item completed !!!";
+      }
+      return `${finished} items completed !!!`;
+    },
   },
   data() {
     return {
       newItem: '',
-      todo: []
+      todo: [],
+      completionHistory: []
     }
   },
   async created() {
     await this.loadToDo();
+    await this.loadCompletionHistory();
   },
   methods: {
+    generateLabel(description, quantity) {
+      if (description.includes('#')) {
+        const temp = description.replace('#', quantity);
+        if (temp.includes(`(s)`)) {
+          if (quantity == 1) {
+            return temp.replace(`(s)`, '');
+          } else {
+            return temp.replace(`(s)`, 's');
+          }
+        } else {
+          return temp;
+        }
+      } else {
+        if (quantity == 1) {
+          return description;
+        }
+        return `${quantity} ${description}`
+      }
+    },
+    async loadCompletionHistory() {
+      const currentDate = new Date();
+      const start = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -7));
+      const end = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -1));
+      const results = await todoData.getCompletionHistory(start, end);
+      this.completionHistory = results.map(h => {
+        return {
+          index: h.index,
+          day: dateTools.getAbrrDayName(dateTools.convertYYYYMMDDtoDate(h.completionDate)),
+          count: h.count
+        }
+      });
+      console.log(JSON.stringify(this.completionHistory));
+    },
     async onAddItemEnter(event) {
       if (event.keyCode == 13 && this.newItem != undefined && this.newItem.trim().length > 0) {
         await this.onAddItem();
@@ -81,7 +118,8 @@ export default {
       this.todo.push(addedItem);
       this.newItem = '';
     },
-    async onChangeCompletion(index) {
+    async onChangeCompletion(index, value) {
+      this.todo[index].completed = value;
       await todoData.changeToDoCompletion(this.todo[index].id,
           this.todo[index].completed,
           this.todo[index].taskId);
@@ -112,6 +150,27 @@ export default {
 <style lang="scss">
 
 @import '../shared/style/theme';
+
+.history-day {
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.history-count {
+  text-align: center;
+}
+
+.history-box {
+  display: flex;
+  flex-direction: column;
+  border: solid 2px $primary-color-dark;
+  margin: 10px 5px 5px;
+  padding: 5px;
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  justify-content: center;
+}
 
 input::placeholder {
   color: #333333;
