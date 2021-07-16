@@ -10,8 +10,8 @@
       </div>
       <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
       <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-      <div class="row">
-        <div class="col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
+      <div class="to-do-list-section">
+        <div class="to-do-list-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
           <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
                     @delete="onDeleteItem(index)"
                     @snooze="onSnoozeItem(index)"
@@ -130,6 +130,16 @@ export default {
 <style lang="scss">
 
 @import '../shared/style/theme';
+
+.to-do-list-section {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.to-do-list-item {
+  padding: 5px;
+}
 
 .history-day {
   text-align: center;
