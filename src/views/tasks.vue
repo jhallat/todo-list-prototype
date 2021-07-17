@@ -3,63 +3,26 @@
     <div class="tasks-container col-sm-12 col-lg-10 offset-lg-1">
       <div class="tasks-container-heading">Tasks</div>
       <div class="goal-selection">
-        <label>Goal</label>
+        <label class="margin-right-small">Goal</label>
         <select v-model="selectedGoal" @change="onSelectedGoal">
           <option v-for="(goal) in goals" :value="goal.id" :key="goal.id">
             {{ goal.description }}
           </option>
         </select>
       </div>
-      <div v-if = "!editMode" class="input-line bottom-margin-medium">
-        <input v-model="newTask.description" @keypress="onAddItemEnter"/>
-        <div class="check-box">
-          <input type="checkbox" v-model="newTask.isOngoing"/>
-          Ongoing
-        </div>
-        <div class="check-box">
-          <input type="checkbox" v-model="newTask.isQuantifiable"/>
-          Quantifiable
-        </div>
-        <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-      </div>
-      <div v-if = "editMode" class="input-line bottom-margin-medium">
-        <input v-model="editTask.description" @keypress="onEditItemEnter"/>
-        <div class="check-box">
-          <input type="checkbox" v-model="editTask.isOngoing"/>
-          Ongoing
-        </div>
-        <div class="check-box">
-          <input type="checkbox" v-model="editTask.isQuantifiable"/>
-          Quantifiable
-        </div>
-        <button class="left-margin-small" @click="onEditItem" :disabled="isEditInvalid">Edit</button>
-        <button class="left-margin-small" @click="onCancelEdit" >Cancel</button>
-      </div>
+      <TaskEdit :task="editTask" :edit-mode="editMode"
+                @cancel="onCancelEdit"
+                @add="onAddItem($event)"
+                @edit="onEditItem($event)"></TaskEdit>
       <div class="section">
         <div class="section-heading">Pending
-        <div class="button-bar">
-          <button :disabled="isNotActionable" @click="onAddToToDo">Add to To Do List</button>
-          |
-          <button :disabled="isNotActionable" @click="onDeleteItem">Delete</button>
-          |
-          <button :disabled="isNotActionable" @click="onOpenScheduleDialog">Schedule</button>
-        </div>
         </div>
         <div class="row">
-          <div class="task col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
-            <div class="check-box">
-              <input type="checkbox" v-model="task.selected">
-            </div>
-            <div :hidden="!task.isQuantifiable">
-              <input class="quantity-input" placeholder="1" v-model="task.quantity" maxlength="3" size="3">
-            </div>
-            <div @click="onSelectForEdit(index)">{{ task.description }}</div>
-            <div :hidden="!task.isOngoing" class="task-decoration">
-              <font-awesome-icon icon="sync"/>
-            </div>
-            <div :hidden="!task.isQuantifiable" class="task-decoration">
-              <font-awesome-icon icon="hashtag"/>
-            </div>
+          <div class="col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
+            <TaskItem :task="task" @delete="onDeleteItem(index)"
+                                   @edit="onSelectForEdit(index)"
+                                   @start="onStart(index, $event)"
+                                   @schedule="onSchedule(index)"></TaskItem>
           </div>
         </div>
       </div>
@@ -89,6 +52,8 @@
 <script>
 import {goalData, taskData, todoData, scheduleData} from "@/shared";
 import ScheduleDialog from "@/components/schedule-dialog";
+import TaskItem from "@/components/task-item";
+import TaskEdit from "@/components/task-edit";
 
 const EMPTY_TASK = {
   description: '',
@@ -98,7 +63,7 @@ const EMPTY_TASK = {
 
 export default {
   name: 'Tasks',
-  components: {ScheduleDialog},
+  components: {TaskEdit, TaskItem, ScheduleDialog},
   computed: {
     isAddInvalid() {
       return this.newTask === undefined || this.newTask.description.trim().length === 0;
@@ -122,65 +87,57 @@ export default {
       inProgressTasks: [],
       completedTasks: [],
       schedules: [],
-      editMode: false,
+      editMode: 'add',
       editTask: {
         id: 0,
         description: '',
         isOngoing: false,
         isQuantifiable: false
       },
-      displayScheduleDialog: false
+      displayScheduleDialog: false,
+      taskToSchedule: EMPTY_TASK
     }
   },
   async created() {
     await this.loadGoals();
   },
   methods: {
-    async onOpenScheduleDialog() {
+    async onSchedule(index) {
       this.schedules = await scheduleData.getSchedules();
-      console.log(this.schedules)
       this.displayScheduleDialog = true;
+      this.taskToSchedule = this.pendingTasks[index]
     },
     onScheduleSelect(scheduleId) {
-      console.log(`scheduledId = ${scheduleId}`);
-      this.pendingTasks
-          .filter(task => task.selected)
-          .forEach((task) => {
-            scheduleData.addTask(scheduleId, task.id, task.description,  parseInt(task.quantity));
-          });
-      this.pendingTasks.forEach(task => task.selected = false);
+      const task = this.taskToSchedule;
+      scheduleData.addTask(scheduleId, task.id, task.description,  parseInt(task.quantity));
       this.displayScheduleDialog = false;
+      this.taskToSchedule = EMPTY_TASK;
     },
     onScheduleCancel() {
       this.displayScheduleDialog = false;
     },
-    async onAddItem() {
+    async onAddItem(task) {
       let addedTask = await taskData.addTask(
           {
             goalId: this.selectedGoal,
-            description: this.newTask.description,
-            isOngoing: this.newTask.isOngoing,
-            isQuantifiable: this.newTask.isQuantifiable
+            description: task.description,
+            isOngoing: task.isOngoing,
+            isQuantifiable: task.isQuantifiable
           });
-      addedTask.quantity = 1;
+      task.quantity = 1;
       this.pendingTasks.push(addedTask);
-      this.newTask.description = '';
-      this.newTask.isQuantifiable = false;
-      this.newTask.isOngoing = false;
+      this.editTask.description = '';
+      this.editTask.isQuantifiable = false;
+      this.editTask.isOngoing = false;
     },
-    onEditItemEnter(event) {
-      if (event.keyCode == 13 && this.newTask != undefined && this.newTask.description.trim().length > 0) {
-        this.onEditItem();
-      }
-    },
-    onEditItem() {
+    onEditItem(task) {
       taskData.updateTask({
-        id: this.editTask.id,
-        description: this.editTask.description,
-        isOngoing: this.editTask.isOngoing,
-        isQuantifiable: this.editTask.isQuantifiable
+        id: task.id,
+        description: task.description,
+        isOngoing: task.isOngoing,
+        isQuantifiable: task.isQuantifiable
       })
-      const index = this.pendingTasks.findIndex(item => item.id == this.editTask.id)
+      const index = this.pendingTasks.findIndex(item => item.id == task.id)
       this.pendingTasks[index].description = this.editTask.description;
       this.pendingTasks[index].isOngoing = this.editTask.isOngoing;
       this.pendingTasks[index].isQuantifiable = this.editTask.isQuantifiable;
@@ -188,51 +145,40 @@ export default {
       this.editTask.description = '';
       this.editTask.isQuantifiable = false;
       this.editTask.isOngoing = false;
-      this.editMode = false;
+      this.editMode = 'add';
     },
     onCancelEdit() {
       this.editTask.id = 0;
       this.editTask.description = '';
       this.editTask.isQuantifiable = false;
       this.editTask.isOngoing = false;
-      this.editMode = false;
+      this.editMode = 'add';
     },
     onSelectForEdit(index) {
-      this.editMode = true;
+      this.editMode = 'edit';
       const task = this.pendingTasks[index];
       this.editTask.id = task.id;
       this.editTask.description = task.description;
       this.editTask.isOngoing = task.isOngoing;
       this.editTask.isQuantifiable = task.isQuantifiable;
+      console.log(this.editMode);
     },
     onAddItemEnter(event) {
       if (event.keyCode == 13 && this.newTask != undefined && this.newTask.description.trim().length > 0) {
         this.onAddItem();
       }
     },
-    onDeleteItem() {
-      const tasksForRemoval = [];
-      this.pendingTasks
-          .filter(task => task.selected)
-          .forEach((task, index) => {
-            taskData.deleteTask(task.id);
-            tasksForRemoval.push(index);
-          });
-      tasksForRemoval.reverse().forEach(index => this.pendingTasks.splice(index, 1));
-      this.pendingTasks.forEach(task => task.selected = false);
+    onDeleteItem(index) {
+      const id = this.pendingTasks[index].id;
+      taskData.deleteTask(id);
+      this.pendingTasks.splice(index, 1);
     },
-    onAddToToDo() {
-      const tasksForRemoval = [];
-      this.pendingTasks
-          .filter(task => task.selected)
-          .forEach((task, index) => {
-            todoData.addToDo(task.description, task.id, task.quantity);
-            task.status.key="IN_PROGRESS";
-            tasksForRemoval.push(index);
-            this.inProgressTasks.push(task);
-          });
-      tasksForRemoval.reverse().forEach(index => this.pendingTasks.splice(index, 1));
-      this.pendingTasks.forEach(task => task.selected = false);
+    onStart(index, quantity) {
+      const task = this.pendingTasks[index]
+      todoData.addToDo(task.description, task.id, quantity);
+      task.status.key="IN_PROGRESS";
+      this.inProgressTasks.push(task);
+      this.pendingTasks.splice(index, 1);
     },
     async loadGoals() {
       this.goals = await goalData.getGoals();
@@ -240,8 +186,7 @@ export default {
     async onSelectedGoal() {
       const tasks = await taskData.getTasks(this.selectedGoal);
       this.pendingTasks = tasks
-          .filter(task => task.status.key === 'PENDING')
-          .map(task => Object.assign({}, task, {selected: false, quantity: 1}));
+          .filter(task => task.status.key === 'PENDING');
       this.inProgressTasks = tasks
           .filter(task => task.status.key === 'IN_PROGRESS');
       this.completedTasks = tasks
@@ -270,45 +215,9 @@ export default {
   color: $primary-color-dark;
 }
 
-.quantity-input {
-  margin-right: 10px;
-  width: 40px;
-}
-
-label {
-  margin-right: 10px;
-}
-
-.input-line {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.check-box {
-  margin-right: 5px;
-  margin-left: 10px;
-}
 
 .goal-selection {
   margin-bottom: 15px;
-}
-
-.task-decoration {
-  margin-left: 5px;
-  color: $primary-color-x-dark;
-}
-
-.task {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 10px;
-  &:hover {
-    text-decoration: underline;
-    cursor: pointer;
-    color: $primary-color;
-  }
 }
 
 

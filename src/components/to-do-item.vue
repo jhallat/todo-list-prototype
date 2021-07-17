@@ -1,30 +1,26 @@
 <template>
-  <div class="to-do-item">
-    <div class="check todo-selected" v-if="selected && quantity == 1" @click="toggleSelect()">
-      <font-awesome-icon :icon="['fas', 'check-square']"/>
+  <div class="tdi-container">
+    <div v-if="quantity == 1">
+      <CheckBox :selected="selected" @select="toggleSelect($event)"></CheckBox>
     </div>
-    <div class="check todo-unselected" v-if="!selected && quantity == 1" @click="toggleSelect()">
-      <font-awesome-icon :icon="['far', 'square']"/>
-    </div>
-    <div v-if="quantity > 1" class="todo-input">
+    <div v-else class="todo-input">
       <input type="text" placeholder="1" maxlength="3" v-model="adjustment"/>
       <button class="adjust-button" @click="onAdjust">-</button>
     </div>
-    <div class="item-label">
+    <div class="no-wrap">
       {{ generateLabel(description, quantity) }}
     </div>
-
-    <div class="icon-bar">
+    <div class="tdi-icon-bar">
       <div class="tooltip" v-show="showSnooze">
         Snooze
       </div>
       <div class="tooltip" v-show="showDelete">
         Delete
       </div>
-      <div class="icon-button" @mouseover="toggleSnooze(true)" @mouseout="toggleSnooze(false)" @click="onSnooze">
+      <div class="tdi-icon-button" @mouseover="toggleSnooze(true)" @mouseout="toggleSnooze(false)" @click="onSnooze">
         <font-awesome-icon :icon="['far', 'clock']"/>
       </div>
-      <div class="icon-button" @mouseover="toggleDelete(true)" @mouseout="toggleDelete(false)" @click="onDelete">
+      <div class="tdi-icon-button" @mouseover="toggleDelete(true)" @mouseout="toggleDelete(false)" @click="onDelete">
         <font-awesome-icon :icon="['far', 'times-circle']"/>
       </div>
     </div>
@@ -32,8 +28,10 @@
 </template>
 
 <script>
+import CheckBox from "@/components/check-box";
 export default {
   name: 'ToDoItem',
+  components: {CheckBox},
   props: {
     description: {
       type: String,
@@ -77,8 +75,8 @@ export default {
         return `${quantity} ${description}`
       }
     },
-    toggleSelect() {
-      this.$emit("select", !this.selected);
+    toggleSelect(value) {
+      this.$emit("select", value);
     },
     toggleSnooze(value) {
       this.showSnooze = value;
@@ -103,61 +101,27 @@ export default {
 <style lang="scss">
 @import '../shared/style/theme';
 
-.to-do-item {
-  margin-bottom: 3px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 5px;
-  border-radius: 5px;
+.tdi-container {
+  @include item-container;
 
   &:hover {
-    background-color: $accent-color;
-
-    .icon-button {
+    .tdi-icon-button {
       visibility: visible;
     }
   }
+
+  input:focus {
+    outline: none;
+  }
 }
 
-.item-label {
-  white-space: nowrap;
-}
-
-.icon-bar {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
+.tdi-icon-bar {
+  @include icon-bar;
   width: 100%;
 }
 
-.icon-button {
-  font-size: 18px;
-  visibility: hidden;
-  color: #666666;
-  padding-right: 5px;
-
-  &:hover {
-    color: $primary-color;
-  }
-
-  &:hover:active {
-    color: $primary-color-dark;
-  }
-}
-
-.check {
-  font-size: 18px;
-  padding-right: 5px;
-}
-
-.todo-unselected {
-  color: #666666;
-}
-
-.todo-selected {
-  color: $primary-color;
+.tdi-icon-button {
+  @include icon-button;
 }
 
 .tooltip {

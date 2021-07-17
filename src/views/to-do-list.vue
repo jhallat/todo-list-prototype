@@ -1,39 +1,46 @@
 <template>
   <div>
-  <div class="row">
-    <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
-      <div class="todo-list-container-heading">
-        <div class="todo-list-container-heading-title">To Do List</div>
-        <div class="button-bar">
-          <button @click="loadToDo">Refresh</button>
-        </div>
-      </div>
-      <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
-      <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-      <div class="to-do-list-section">
-        <div class="to-do-list-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
-          <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
-                    @delete="onDeleteItem(index)"
-                    @snooze="onSnoozeItem(index)"
-                    @select="onChangeCompletion(index, $event)"
-                    @adjust="onAdjust(index, $event)">
-          </ToDoItem>
-         </div>
-      </div>
-    </div>
     <div class="row">
       <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
-        <div class="completed-amount">
-          {{ completedLabel }}
+        <div class="todo-list-container-heading">
+          <div class="todo-list-container-heading-title">To Do List</div>
+          <div class="button-bar">
+            <button @click="refresh">Refresh</button>
+          </div>
+          <div class="left-margin-small">
+            <CheckBox :selected="hideCompleted" label="Hide completed items" @select="toggleHideCompleted($event)"></CheckBox>
+          </div>
         </div>
-        <div class="row">
-          <div class="history-box" v-for="(history) in completionHistory" :key="history.index">
-            <div class="history-day">{{ history.day }}</div>
-            <div class="history-count">{{ history.count }}</div>
+        <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
+        <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
+        <div class="to-do-list-section">
+          <div class="to-do-list-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
+            <div v-if="!hideCompleted || (hideCompleted && !item.completed)">
+            <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
+                      @delete="onDeleteItem(index)"
+                      @snooze="onSnoozeItem(index)"
+                      @select="onChangeCompletion(index, $event)"
+                      @adjust="onAdjust(index, $event)">
+            </ToDoItem>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class="row">
+        <div class="todo-list-container col-sm-12 col-lg-10 offset-lg-1">
+          <div class="completed-amount">
+            {{ completedLabel }}
+          </div>
+          <div class="row">
+            <div class="history-line">
+              <div class="history-box" v-for="(history) in completionHistory" :key="history.index">
+                <div class="history-day">{{ history.day }}</div>
+                <div class="history-count">{{ history.count }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -41,10 +48,11 @@
 <script>
 import {todoData, dateTools} from '../shared';
 import ToDoItem from "@/components/to-do-item";
+import CheckBox from "@/components/check-box";
 
 export default {
   name: 'ToDoList',
-  components: {ToDoItem},
+  components: {CheckBox, ToDoItem},
   computed: {
     isAddInvalid() {
       return this.newItem == undefined || this.newItem.trim().length == 0;
@@ -63,6 +71,7 @@ export default {
   data() {
     return {
       newItem: '',
+      hideCompleted: false,
       todo: [],
       completionHistory: []
     }
@@ -72,6 +81,9 @@ export default {
     await this.loadCompletionHistory();
   },
   methods: {
+    toggleHideCompleted(value) {
+      this.hideCompleted = value;
+    },
     async loadCompletionHistory() {
       const currentDate = new Date();
       const start = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -7));
@@ -83,8 +95,7 @@ export default {
           day: dateTools.getAbrrDayName(dateTools.convertYYYYMMDDtoDate(h.completionDate)),
           count: h.count
         }
-      });
-      console.log(JSON.stringify(this.completionHistory));
+      }).reverse();
     },
     async onAddItemEnter(event) {
       if (event.keyCode == 13 && this.newItem != undefined && this.newItem.trim().length > 0) {
@@ -93,6 +104,10 @@ export default {
     },
     async loadToDo() {
       this.todo = await todoData.getToDo();
+    },
+    refresh() {
+      this.loadToDo();
+      this.loadCompletionHistory();
     },
     async onAddItem() {
       let addedItem = await todoData.addToDo(this.newItem);
@@ -117,7 +132,7 @@ export default {
     async onAdjust(index, adjustment) {
       const id = this.todo[index].id;
       if (adjustment === '') {
-         adjustment = 1;
+        adjustment = 1;
       }
       const response = await todoData.adjustQuantity(id, adjustment);
       this.todo[index].quantity = response.quantity;
@@ -162,6 +177,10 @@ export default {
   justify-content: center;
 }
 
+.history-line {
+  display: flex;
+  flex-direction: row;
+}
 
 .completed-amount {
   font-size: 1.5em;
@@ -200,7 +219,6 @@ button {
 .bottom-margin-medium {
   margin-bottom: 20px;
 }
-
 
 
 /* .todo-item {
