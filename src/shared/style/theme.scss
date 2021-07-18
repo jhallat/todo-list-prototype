@@ -41,7 +41,10 @@ $directions:
 $margins:
   "xx-small" 3px,
   "x-small" 6px,
-  "small" 9px;
+  "small" 9px,
+  "med-small" 12px,
+  "medium" 15px,
+  "med-large" 18px;
 
 @each $direction in $directions {
   @each $name, $size in $margins {
@@ -49,17 +52,6 @@ $margins:
       margin-#{$direction}: #{$size};
     }
   }
-}
-
-.margin-right-small{
-  margin-right: 9px;
-}
-margin-right-x-small {
-  margin-right: 6px;
-}
-
-margin-right-xx-small {
-  margin-right: 3px;
 }
 
 @for $i from 1 through 12 {
@@ -196,6 +188,16 @@ margin-right-xx-small {
     border: solid 1px $primary-color;
     animation-duration: 750ms;
     animation-name: push;
+  }
+  &:hover:disabled {
+    color: gray;
+    border: solid 1px rgba(0,0,0,0);
+  }
+  &:hover:disabled:active {
+    animation: none;
+  }
+  &:disabled {
+    color: gray;
   }
 }
 

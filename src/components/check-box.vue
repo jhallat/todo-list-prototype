@@ -46,7 +46,7 @@ export default {
 }
 
 .cbx-unselected {
-  color: #666666;
+  color: $primary-color-dark;
 }
 
 .cbx-selected {

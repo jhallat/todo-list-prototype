@@ -2,6 +2,8 @@
   <div class="row">
     <div class="tasks-container col-sm-12 col-lg-10 offset-lg-1">
       <div class="tasks-container-heading">Tasks</div>
+
+      <!-- Select a goal -->
       <div class="goal-selection">
         <label class="margin-right-small">Goal</label>
         <select v-model="selectedGoal" @change="onSelectedGoal">
@@ -10,38 +12,37 @@
           </option>
         </select>
       </div>
+
+      <!-- Add or Edit a task -->
       <TaskEdit :task="editTask" :edit-mode="editMode"
                 @cancel="onCancelEdit"
                 @add="onAddItem($event)"
                 @edit="onEditItem($event)"></TaskEdit>
-      <div class="section">
-        <div class="section-heading">Pending
+
+      <!-- Pending items section -->
+      <ListSection heading="Pending">
+        <div class="col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
+          <TaskItem :task="task" @delete="onDeleteItem(index)"
+                    @edit="onSelectForEdit(index)"
+                    @start="onStart(index, $event)"
+                    @schedule="onSchedule(index)"></TaskItem>
         </div>
-        <div class="row">
-          <div class="col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
-            <TaskItem :task="task" @delete="onDeleteItem(index)"
-                                   @edit="onSelectForEdit(index)"
-                                   @start="onStart(index, $event)"
-                                   @schedule="onSchedule(index)"></TaskItem>
-          </div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-heading">In Progress</div>
-        <div class="row">
+      </ListSection>
+
+      <!-- In progress section -->
+      <ListSection heading="In Progress">
           <div class="task col-sm-12 col-md-6" v-for="(task) in inProgressTasks" :key="task.id">
             {{ task.description }}
           </div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-heading">Completed</div>
-        <div class="row">
+      </ListSection>
+
+      <!-- Completed section -->
+      <ListSection heading="Completed">
           <div class="task col-sm-12 col-md-6" v-for="(task) in completedTasks" :key="task.id">
             {{ task.description }}
           </div>
-        </div>
-      </div>
+      </ListSection>
+
     </div>
     <div v-if="displayScheduleDialog">
       <ScheduleDialog :schedules="schedules" @dialogOk="onScheduleSelect" @dialogCancel="onScheduleCancel"></ScheduleDialog>
@@ -54,6 +55,7 @@ import {goalData, taskData, todoData, scheduleData} from "@/shared";
 import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
 import TaskEdit from "@/components/task-edit";
+import ListSection from "@/components/list-section";
 
 const EMPTY_TASK = {
   description: '',
@@ -63,7 +65,7 @@ const EMPTY_TASK = {
 
 export default {
   name: 'Tasks',
-  components: {TaskEdit, TaskItem, ScheduleDialog},
+  components: {ListSection, TaskEdit, TaskItem, ScheduleDialog},
   computed: {
     isAddInvalid() {
       return this.newTask === undefined || this.newTask.description.trim().length === 0;
@@ -162,11 +164,6 @@ export default {
       this.editTask.isOngoing = task.isOngoing;
       this.editTask.isQuantifiable = task.isQuantifiable;
       console.log(this.editMode);
-    },
-    onAddItemEnter(event) {
-      if (event.keyCode == 13 && this.newTask != undefined && this.newTask.description.trim().length > 0) {
-        this.onAddItem();
-      }
     },
     onDeleteItem(index) {
       const id = this.pendingTasks[index].id;

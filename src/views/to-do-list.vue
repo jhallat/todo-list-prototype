@@ -5,14 +5,14 @@
         <div class="todo-list-container-heading">
           <div class="todo-list-container-heading-title">To Do List</div>
           <div class="button-bar">
-            <button @click="refresh">Refresh</button>
+            <button class="tdl-button" @click="refresh">Refresh</button>
           </div>
           <div class="left-margin-small">
             <CheckBox :selected="hideCompleted" label="Hide completed items" @select="toggleHideCompleted($event)"></CheckBox>
           </div>
         </div>
-        <input class="bottom-margin-medium" v-model="newItem" @keypress="onAddItemEnter"/>
-        <button class="left-margin-small" @click="onAddItem" :disabled="isAddInvalid">Add</button>
+        <input class="bottom-margin-medium tdl-input" v-model="newItem" @keypress="onAddItemEnter"/>
+        <button class="left-margin-small tdl-button" @click="onAddItem" :disabled="isAddInvalid">Add</button>
         <div class="to-do-list-section">
           <div class="to-do-list-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
             <div v-if="!hideCompleted || (hideCompleted && !item.completed)">
@@ -146,6 +146,10 @@ export default {
 
 @import '../shared/style/theme';
 
+.tdl-input {
+  @include primary-input;
+}
+
 .to-do-list-section {
   display: flex;
   flex-direction: row;
@@ -187,24 +191,8 @@ export default {
   font-style: italic;
 }
 
-button {
-  border: none;
-  border-radius: 3px;
-  padding: 5px;
-  background-color: white;
-  color: #2c3e50;
-
-  &:disabled {
-    color: #cccccc;
-  }
-
-  &:hover {
-    background-color: #eeeeee;
-
-    &:disabled {
-      background-color: #ffffff;
-    }
-  }
+.tdl-button {
+  @include primary-button;
 }
 
 
@@ -220,28 +208,6 @@ button {
   margin-bottom: 20px;
 }
 
-
-/* .todo-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 5px;
-  border-radius: 5px;
-
-  button {
-    visibility: hidden;
-    background: none;
-    float: right;
-  }
-
-  &:hover {
-    background-color: $accent-color;
-
-    button {
-      visibility: visible;
-    }
-  }
-} */
 
 .todo-list-container {
   @include container;
@@ -263,7 +229,4 @@ button {
   @include container-heading-title;
 }
 
-input[type=checkbox] {
-  background-color: #2196F3;
-}
 </style>
