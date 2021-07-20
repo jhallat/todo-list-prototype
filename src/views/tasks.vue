@@ -23,16 +23,16 @@
       <ListSection heading="Pending">
         <div class="col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
           <TaskItem :task="task" @delete="onDeleteItem(index)"
-                    @edit="onSelectForEdit(index)"
+                    @edit="onSelectForEdit(task.id)"
                     @start="onStart(index, $event)"
-                    @schedule="onSchedule(index)"></TaskItem>
+                    @schedule="onSchedule(index)"/>
         </div>
       </ListSection>
 
       <!-- In progress section -->
       <ListSection heading="In Progress">
           <div class="task col-sm-12 col-md-6" v-for="(task) in inProgressTasks" :key="task.id">
-            {{ task.description }}
+            <PendingTaskItem :task="task" @edit="onSelectForEdit(task.id)"/>
           </div>
       </ListSection>
 
@@ -56,6 +56,7 @@ import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
 import TaskEdit from "@/components/task-edit";
 import ListSection from "@/components/list-section";
+import PendingTaskItem from "@/components/pending-task-item";
 
 const EMPTY_TASK = {
   description: '',
@@ -65,7 +66,7 @@ const EMPTY_TASK = {
 
 export default {
   name: 'Tasks',
-  components: {ListSection, TaskEdit, TaskItem, ScheduleDialog},
+  components: {PendingTaskItem, ListSection, TaskEdit, TaskItem, ScheduleDialog},
   computed: {
     isAddInvalid() {
       return this.newTask === undefined || this.newTask.description.trim().length === 0;
@@ -139,10 +140,23 @@ export default {
         isOngoing: task.isOngoing,
         isQuantifiable: task.isQuantifiable
       })
-      const index = this.pendingTasks.findIndex(item => item.id == task.id)
-      this.pendingTasks[index].description = this.editTask.description;
-      this.pendingTasks[index].isOngoing = this.editTask.isOngoing;
-      this.pendingTasks[index].isQuantifiable = this.editTask.isQuantifiable;
+      //TODO I am sure there is a better way to do this
+      {
+        const index = this.pendingTasks.findIndex(item => item.id == task.id)
+        if (index >= 0) {
+          this.pendingTasks[index].description = this.editTask.description;
+          this.pendingTasks[index].isOngoing = this.editTask.isOngoing;
+          this.pendingTasks[index].isQuantifiable = this.editTask.isQuantifiable;
+        }
+      }
+      {
+        const index = this.inProgressTasks.findIndex(item => item.id == task.id)
+        if (index >= 0) {
+          this.inProgressTasks[index].description = this.editTask.description;
+          this.inProgressTasks[index].isOngoing = this.editTask.isOngoing;
+          this.inProgressTasks[index].isQuantifiable = this.editTask.isQuantifiable;
+        }
+      }
       this.editTask.id = 0;
       this.editTask.description = '';
       this.editTask.isQuantifiable = false;
@@ -156,14 +170,23 @@ export default {
       this.editTask.isOngoing = false;
       this.editMode = 'add';
     },
-    onSelectForEdit(index) {
+    onSelectForEdit(id) {
       this.editMode = 'edit';
-      const task = this.pendingTasks[index];
-      this.editTask.id = task.id;
-      this.editTask.description = task.description;
-      this.editTask.isOngoing = task.isOngoing;
-      this.editTask.isQuantifiable = task.isQuantifiable;
-      console.log(this.editMode);
+      let task = undefined;
+      { const index = this.pendingTasks.findIndex(item => item.id === parseInt(id));
+        if (index >= 0) {
+          task = this.pendingTasks[index];
+      }}
+      { const index = this.inProgressTasks.findIndex(item => item.id === parseInt(id));
+        if (index >= 0) {
+          task = this.inProgressTasks[index];
+      }}
+      if (task !== undefined) {
+        this.editTask.id = task.id;
+        this.editTask.description = task.description;
+        this.editTask.isOngoing = task.isOngoing;
+        this.editTask.isQuantifiable = task.isQuantifiable;
+      }
     },
     onDeleteItem(index) {
       const id = this.pendingTasks[index].id;
@@ -172,7 +195,8 @@ export default {
     },
     onStart(index, quantity) {
       const task = this.pendingTasks[index]
-      todoData.addToDo(task.description, task.id, quantity);
+      const goal = this.goals.find(item => item.id == this.selectedGoal);
+      todoData.addToDo(task.description, task.id, quantity, goal.id, goal.description);
       task.status.key="IN_PROGRESS";
       this.inProgressTasks.push(task);
       this.pendingTasks.splice(index, 1);

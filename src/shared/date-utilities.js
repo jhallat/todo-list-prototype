@@ -52,7 +52,7 @@ const addDays = (date, days) => {
    return newDate;
 }
 
-export const dateTools = {
+export const dateUtilities = {
     convertToYYYYMMDD,
     convertYYYYMMDDtoDate,
     addDays,

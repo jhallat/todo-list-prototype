@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import { TODO_API } from './config';
+import { TODO_API } from '../config';
 
 const getToDo = async function() {
     try {
@@ -12,12 +12,18 @@ const getToDo = async function() {
     }
 }
 
-const addToDo = async function(description, taskId = 0, quantity = 1) {
+const addToDo = async function(description,
+                               taskId = 0,
+                               quantity = 1,
+                               goalId = 0,
+                               goalDescription = '') {
     const response = await axios.post(`${TODO_API}/todo`,
         {
             description,
             taskId,
-            quantity
+            quantity,
+            goalId,
+            goalDescription
         })
     return response.data;
 }
@@ -76,7 +82,7 @@ const parseList = response => {
 }
 
 
-export const todoData = {
+export const ToDoData = {
     getToDo,
     addToDo,
     changeToDoCompletion,

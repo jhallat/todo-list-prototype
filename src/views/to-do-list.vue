@@ -13,17 +13,17 @@
         </div>
         <input class="bottom-margin-medium tdl-input" v-model="newItem" @keypress="onAddItemEnter"/>
         <button class="left-margin-small tdl-button" @click="onAddItem" :disabled="isAddInvalid">Add</button>
-        <div class="to-do-list-section">
-          <div class="to-do-list-item col-sm-12 col-md-6" v-for="(item, index) in todo" :key="item.id">
-            <div v-if="!hideCompleted || (hideCompleted && !item.completed)">
-            <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
-                      @delete="onDeleteItem(index)"
-                      @snooze="onSnoozeItem(index)"
-                      @select="onChangeCompletion(index, $event)"
-                      @adjust="onAdjust(index, $event)">
-            </ToDoItem>
+        <div class="tdl-list" v-for="goal in filteredGoals" :key="goal.id">
+          <Group :heading="goal.description">
+            <div class="col-sm-12 col-md-6" v-for="(item) in goal.items" :key="item.id">
+              <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
+                        @delete="onDeleteItem(goal.id, item.id)"
+                        @snooze="onSnoozeItem(goal.id, item.id)"
+                        @select="onChangeCompletion(goal.id, item.id, $event)"
+                        @adjust="onAdjust(goal.id, item.id, $event)">
+              </ToDoItem>
             </div>
-          </div>
+          </Group>
         </div>
       </div>
       <div class="row">
@@ -46,19 +46,28 @@
 </template>
 
 <script>
-import {todoData, dateTools} from '../shared';
+import { dateUtilities} from '../shared';
+import { ToDoServiceFactory } from "@/shared/service";
+//TODO replace with class/factory
+import { ToDoData } from "@/shared/data";
 import ToDoItem from "@/components/to-do-item";
 import CheckBox from "@/components/check-box";
+import Group from "@/components/group";
 
 export default {
   name: 'ToDoList',
-  components: {CheckBox, ToDoItem},
+  components: {Group, CheckBox, ToDoItem},
   computed: {
     isAddInvalid() {
       return this.newItem == undefined || this.newItem.trim().length == 0;
     },
     completedLabel() {
-      const finished = this.todo.filter(t => t.completed).length;
+      let finished = 0;
+      if (this.goals !== undefined && this.goals.length > 0) {
+        finished = this.goals
+            .map(goal => goal.items.filter(item => item.completed).length)
+            .reduce((accumulator, currentValue) => accumulator + currentValue);
+      }
       if (finished == 0) {
         return "Just getting started !!!";
       }
@@ -67,16 +76,26 @@ export default {
       }
       return `${finished} items completed !!!`;
     },
+    filteredGoals() {
+      if (this.hideCompleted) {
+        return this.goals
+            .map(goal => Object.assign({}, goal, {items: goal.items.filter(i => !i.completed)}))
+            .filter(goal => goal.items.length > 0);
+      }
+      return this.goals;
+    }
   },
   data() {
     return {
+      toDoService: {},
       newItem: '',
       hideCompleted: false,
-      todo: [],
+      goals: [],
       completionHistory: []
     }
   },
   async created() {
+    this.toDoService = ToDoServiceFactory.createInstance();
     await this.loadToDo();
     await this.loadCompletionHistory();
   },
@@ -86,57 +105,108 @@ export default {
     },
     async loadCompletionHistory() {
       const currentDate = new Date();
-      const start = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -7));
-      const end = dateTools.convertToYYYYMMDD(dateTools.addDays(currentDate, -1));
-      const results = await todoData.getCompletionHistory(start, end);
+      const start = dateUtilities.convertToYYYYMMDD(dateUtilities.addDays(currentDate, -7));
+      const end = dateUtilities.convertToYYYYMMDD(dateUtilities.addDays(currentDate, -1));
+      const results = await ToDoData.getCompletionHistory(start, end);
       this.completionHistory = results.map(h => {
         return {
           index: h.index,
-          day: dateTools.getAbrrDayName(dateTools.convertYYYYMMDDtoDate(h.completionDate)),
+          day: dateUtilities.getAbrrDayName(dateUtilities.convertYYYYMMDDtoDate(h.completionDate)),
           count: h.count
         }
       }).reverse();
     },
     async onAddItemEnter(event) {
-      if (event.keyCode == 13 && this.newItem != undefined && this.newItem.trim().length > 0) {
+      if (event.keyCode === 13 && this.newItem !== undefined && this.newItem.trim().length > 0) {
         await this.onAddItem();
       }
     },
     async loadToDo() {
-      this.todo = await todoData.getToDo();
+      this.goals = await this.toDoService.getToDoListForToday();
     },
     refresh() {
-      this.loadToDo();
+      this.goals = this.toDoService.getToDoListForToday();
       this.loadCompletionHistory();
     },
+
     async onAddItem() {
-      let addedItem = await todoData.addToDo(this.newItem);
+      let addedItem = await this.toDoService.addToDo(this.newItem);
       addedItem.quantity = 1;
-      this.todo.push(addedItem);
+      this.goals[0].items.push(addedItem);
       this.newItem = '';
     },
-    async onChangeCompletion(index, value) {
-      this.todo[index].completed = value;
-      await todoData.changeToDoCompletion(this.todo[index].id,
-          this.todo[index].completed,
-          this.todo[index].taskId);
+
+    findIndices(goalId, todoId) {
+      const goalIndex = this.goals.findIndex(goal => goal.id === parseInt(goalId));
+      if (goalIndex < 0) {
+        console.log(`goal with id ${goalId} not found`);
+        return undefined;
+      }
+      const todoIndex  = this.goals[goalIndex].items.findIndex(item => item.id === parseInt(todoId));
+      if (goalIndex < 0) {
+        console.log(`item with goal id ${goalId} and to do id ${todoId} not found`);
+        return undefined;
+      }
+      return { goalIndex, todoIndex }
     },
-    async onDeleteItem(index) {
-      await todoData.deleteToDo(this.todo[index].id);
-      this.todo.splice(index, 1);
+
+    findItem(goalId, todoId) {
+      const indices = this.findIndices(goalId, todoId);
+      if (indices === undefined) {
+        return undefined;
+      }
+      const { goalIndex, todoIndex} = indices;
+      return this.goals[goalIndex].items[todoIndex];
     },
-    async onSnoozeItem(index) {
-      await todoData.snoozeToDo(this.todo[index].id, 1);
-      this.todo.splice(index, 1);
+
+    removeItem(todo) {
+      const indices = this.findIndices(todo.goalId, todo.id)
+      if (indices !== undefined) {
+        const {goalIndex, todoIndex } = indices;
+        this.goals[goalIndex].items.splice(todoIndex, 1);
+      }
     },
-    async onAdjust(index, adjustment) {
-      const id = this.todo[index].id;
+
+    async onChangeCompletion(goalId, todoId, value) {
+      const todoItem = this.findItem(goalId, todoId);
+      if (todoItem === undefined) {
+        return;
+      }
+      todoItem.completed = value;
+      await ToDoData.changeToDoCompletion(todoItem.id,
+          todoItem.completed,
+          todoItem.taskId);
+    },
+
+    async onDeleteItem(goalId, todoId) {
+      const todoItem = this.findItem(goalId, todoId);
+      if (todoItem === undefined) {
+        return;
+      }
+      await this.toDoService.deleteToDo(todoItem.id);
+      this.removeItem(todoItem);
+    },
+
+    async onSnoozeItem(goalId, todoId) {
+      const todoItem = this.findItem(goalId, todoId);
+      if (todoItem === undefined) {
+        return;
+      }
+      await this.toDoService.snoozeToDo(todoItem.id, 1);
+      this.removeItem(todoItem);
+    },
+
+    async onAdjust(goalId, todoId, adjustment) {
+      const todoItem = this.findItem(goalId, todoId);
+      if (todoItem === undefined) {
+        return;
+      }
       if (adjustment === '') {
         adjustment = 1;
       }
-      const response = await todoData.adjustQuantity(id, adjustment);
-      this.todo[index].quantity = response.quantity;
-      this.todo[index].completed = response.completed;
+      const response = await this.toDoService.adjustQuantity(todoItem.id, adjustment);
+      todoItem.quantity = response.quantity;
+      todoItem.completed = response.completed;
     }
   }
 }
@@ -150,14 +220,16 @@ export default {
   @include primary-input;
 }
 
-.to-do-list-section {
+.tdl-list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  padding-bottom: 15px;
+  width: 100%;
 }
 
-.to-do-list-item {
-  padding: 5px;
+.tdl-item {
+  padding: 3px;
 }
 
 .history-day {
