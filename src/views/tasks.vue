@@ -51,7 +51,8 @@
 </template>
 
 <script>
-import {goalData, taskData, todoData, scheduleData} from "@/shared";
+import {goalData, taskData, scheduleData} from "@/shared";
+import { ToDoData } from "@/shared/data";
 import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
 import TaskEdit from "@/components/task-edit";
@@ -196,7 +197,7 @@ export default {
     onStart(index, quantity) {
       const task = this.pendingTasks[index]
       const goal = this.goals.find(item => item.id == this.selectedGoal);
-      todoData.addToDo(task.description, task.id, quantity, goal.id, goal.description);
+      ToDoData.addToDo(task.description, task.id, quantity, goal.id, goal.description);
       task.status.key="IN_PROGRESS";
       this.inProgressTasks.push(task);
       this.pendingTasks.splice(index, 1);

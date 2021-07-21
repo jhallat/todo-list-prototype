@@ -9,6 +9,7 @@
     </div>
     <button v-if="add" class="tke-button margin-left-small" @click="onAddItem" :disabled="isEditInvalid">Add</button>
     <button v-if="edit" class="tke-button margin-left-small" @click="onEditItem" :disabled="isEditInvalid">Edit</button>
+    <button v-if="edit" class="tke-button margin-left-small" @click="onAdvanced" >Advanced</button>
     <button v-if="edit" class="tke-button margin-left-small" @click="onCancel" >Cancel</button>
   </div>
 </template>
@@ -67,6 +68,9 @@ export default {
     },
     onEditItem() {
       this.$emit('edit', {...this.task});
+    },
+    onAdvanced() {
+      this.$emit( 'advanced')
     },
     onCancel() {
       this.$emit('cancel');
