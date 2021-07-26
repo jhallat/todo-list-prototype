@@ -1,7 +1,5 @@
 <template>
-  <div class="row">
-    <div class="tasks-container col-sm-12 col-lg-10 offset-lg-1">
-      <div class="tasks-container-heading">Tasks</div>
+  <PageContent title="Tasks">
 
       <!-- Select a goal -->
       <div class="goal-selection">
@@ -17,7 +15,8 @@
       <TaskEdit :task="editTask" :edit-mode="editMode"
                 @cancel="onCancelEdit"
                 @add="onAddItem($event)"
-                @edit="onEditItem($event)"></TaskEdit>
+                @edit="onEditItem($event)"
+                @advanced="onAdvanced($event)"></TaskEdit>
 
       <!-- Pending items section -->
       <ListSection heading="Pending">
@@ -42,22 +41,21 @@
             {{ task.description }}
           </div>
       </ListSection>
-
-    </div>
     <div v-if="displayScheduleDialog">
       <ScheduleDialog :schedules="schedules" @dialogOk="onScheduleSelect" @dialogCancel="onScheduleCancel"></ScheduleDialog>
     </div>
-  </div>
+  </PageContent>
 </template>
 
 <script>
-import {goalData, taskData, scheduleData} from "@/shared";
+import {goalData, TaskData, scheduleData} from "@/shared";
 import { ToDoData } from "@/shared/data";
 import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
 import TaskEdit from "@/components/task-edit";
 import ListSection from "@/components/list-section";
 import PendingTaskItem from "@/components/pending-task-item";
+import PageContent from "@/components/page-content";
 
 const EMPTY_TASK = {
   description: '',
@@ -67,7 +65,7 @@ const EMPTY_TASK = {
 
 export default {
   name: 'Tasks',
-  components: {PendingTaskItem, ListSection, TaskEdit, TaskItem, ScheduleDialog},
+  components: {PendingTaskItem, ListSection, TaskEdit, TaskItem, ScheduleDialog, PageContent},
   computed: {
     isAddInvalid() {
       return this.newTask === undefined || this.newTask.description.trim().length === 0;
@@ -121,7 +119,7 @@ export default {
       this.displayScheduleDialog = false;
     },
     async onAddItem(task) {
-      let addedTask = await taskData.addTask(
+      let addedTask = await TaskData.addTask(
           {
             goalId: this.selectedGoal,
             description: task.description,
@@ -135,7 +133,7 @@ export default {
       this.editTask.isOngoing = false;
     },
     onEditItem(task) {
-      taskData.updateTask({
+      TaskData.updateTask({
         id: task.id,
         description: task.description,
         isOngoing: task.isOngoing,
@@ -164,6 +162,9 @@ export default {
       this.editTask.isOngoing = false;
       this.editMode = 'add';
     },
+    onAdvanced(task) {
+      this.$router.push({name: 'advanced-edit', params: {id: task.id }})
+    },
     onCancelEdit() {
       this.editTask.id = 0;
       this.editTask.description = '';
@@ -191,7 +192,7 @@ export default {
     },
     onDeleteItem(index) {
       const id = this.pendingTasks[index].id;
-      taskData.deleteTask(id);
+      TaskData.deleteTask(id);
       this.pendingTasks.splice(index, 1);
     },
     onStart(index, quantity) {
@@ -206,7 +207,7 @@ export default {
       this.goals = await goalData.getGoals();
     },
     async onSelectedGoal() {
-      const tasks = await taskData.getTasks(this.selectedGoal);
+      const tasks = await TaskData.getTasks(this.selectedGoal);
       this.pendingTasks = tasks
           .filter(task => task.status.key === 'PENDING');
       this.inProgressTasks = tasks

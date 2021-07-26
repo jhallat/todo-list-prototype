@@ -32,6 +32,7 @@ $alternate-color-x-light: lighten(#AFFF7F, 20%);
   white-space: nowrap;
 }
 
+
 $directions:
   "top",
   "bottom",
@@ -44,7 +45,8 @@ $margins:
   "small" 9px,
   "med-small" 12px,
   "medium" 15px,
-  "med-large" 18px;
+  "med-large" 18px,
+  "large" 21px;
 
 @each $direction in $directions {
   @each $name, $size in $margins {
@@ -92,10 +94,11 @@ $margins:
   border: solid 1px $primary-color-dark;
   padding: 3px 6px;
   border-radius: 10px;
+  font-size: 1em;
   &:focus {
-    outline-color: $primary-color;
-    outline-style: groove;
+    outline: $primary-color solid 1px;
   }
+  font-size: 16px;
 }
 
 @mixin container() {
@@ -178,6 +181,8 @@ $margins:
   color: $primary-color;
   border: solid 1px rgba(0,0,0,0);
   background-color: rgba(0,0,0,0);;
+  padding: 5px;
+  font-size: 1em;
   &:hover {
     border-radius: 10px;
     border: solid 1px $primary-color;

@@ -1,14 +1,23 @@
 import * as axios from 'axios';
-import {TASK_API} from './config';
+import {TASK_API} from '../config';
 
 const getTasks = async function(goalId) {
     try {
-        const response = await axios.get(`${TASK_API}/tasks/${goalId}`);
+        const response = await axios.get(`${TASK_API}/tasks/goal/${goalId}`);
         let data = parseList(response);
         return data;
     } catch (error) {
         console.error(error);
         return [];
+    }
+}
+
+const getTask = async function(taskId) {
+    try {
+        const response = await axios.get(`${TASK_API}/tasks/${taskId}`);
+        return response.data;
+    } catch (error) {
+        return undefined;
     }
 }
 
@@ -52,8 +61,9 @@ const parseList = response => {
     return list;
 }
 
-export const taskData = {
+export const TaskData = {
     getTasks,
+    getTask,
     addTask,
     deleteTask,
     updateTask

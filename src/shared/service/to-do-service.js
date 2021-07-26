@@ -51,7 +51,7 @@ class ToDoService {
 }
 
 export const ToDoServiceFactory ={
-   createInstance: () => {
+   getInstance: () => {
        return new ToDoService();
    }
 }

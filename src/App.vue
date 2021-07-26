@@ -13,7 +13,9 @@
             <li><router-link @click.native="onMenuToggle" to="/schedule">Schedule</router-link></li>
           </ul>
         </nav>
-        <router-view/>
+        <div class="app-contents">
+          <router-view/>
+        </div>
       </div>
     </div>
   </div>
@@ -72,12 +74,25 @@ body {
   background-image: linear-gradient($alternate-color-light, $alternate-color-x-light);
   height: 100%;
   @media only screen and (min-width: $large) {
-    margin: 20px auto;
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
     border-radius: 10px;
     box-shadow: 10px 10px 10px #888888;
   }
-
 }
+
+.app-contents {
+  position: absolute;
+  top: 140px;
+  bottom: 20px;
+  left: 30px;
+  right: 30px;
+  overflow: scroll;
+}
+
 
 nav {
   background-color: $primary-color-dark;

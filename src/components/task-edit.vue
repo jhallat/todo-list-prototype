@@ -70,7 +70,7 @@ export default {
       this.$emit('edit', {...this.task});
     },
     onAdvanced() {
-      this.$emit( 'advanced')
+      this.$emit( 'advanced', {...this.task})
     },
     onCancel() {
       this.$emit('cancel');

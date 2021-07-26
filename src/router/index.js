@@ -4,6 +4,7 @@ import ToDoList from '../views/to-do-list'
 import Goals from '../views/goals'
 import Tasks from '../views/tasks'
 import Schedule from '../views/schedule'
+import AdvancedEdit from '../views/advanced-task-edit'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,12 @@ const routes = [
     name: 'schedule',
     component: Schedule
   },
+  {
+    path: '/advanced-edit/:id',
+    name: 'advanced-edit',
+    component: AdvancedEdit,
+    props: r => ({id: parseInt(r.params.id)})
+  }
 ]
 
 const router = new VueRouter({

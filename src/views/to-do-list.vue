@@ -95,7 +95,7 @@ export default {
     }
   },
   async created() {
-    this.toDoService = ToDoServiceFactory.createInstance();
+    this.toDoService = ToDoServiceFactory.getInstance();
     await this.loadToDo();
     await this.loadCompletionHistory();
   },

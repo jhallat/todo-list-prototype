@@ -54,6 +54,16 @@ const addTask = async function(scheduleId, taskId, taskDescription, taskQuantity
     }
 }
 
+const getWeeklyTask = async function(taskId) {
+    try {
+        const response = await axios.get(`${SCHEDULE_API}/weekly-tasks/${taskId}`)
+        return response.data
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
     if (!response.data) return [];
@@ -68,5 +78,6 @@ export const scheduleData = {
     getSchedules,
     addSchedule,
     addTask,
-    getTasks
+    getTasks,
+    getWeeklyTask
 }
