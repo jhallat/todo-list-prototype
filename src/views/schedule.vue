@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import {scheduleData} from '../shared';
+import {ScheduleData} from '../shared';
 import DaySelector from "@/components/day-selector";
 import DayDisplay from "@/components/day-display";
 
@@ -60,17 +60,17 @@ export default {
   },
   methods: {
     async loadSchedule() {
-      const schedules = await scheduleData.getSchedules();
+      const schedules = await ScheduleData.getSchedules();
       const schedulesWithTasks = [];
       for (let i = 0; i < schedules.length; i++) {
-        const tasks = await scheduleData.getTasks(schedules[i].id);
+        const tasks = await ScheduleData.getTasks(schedules[i].id);
         schedulesWithTasks.push(Object.assign({}, schedules[i], {tasks}));
       }
       this.schedules = schedulesWithTasks;
       console.log(this.schedules)
     },
     async onAddSchedule() {
-      const response = await scheduleData.addSchedule(this.newSchedule)
+      const response = await ScheduleData.addSchedule(this.newSchedule)
       console.log(response)
       if (response != null) {
         this.schedules.push(response);

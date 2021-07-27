@@ -1,15 +1,19 @@
 import { TaskData } from "@/shared/data";
-import {scheduleData} from "@/shared";
+import {ScheduleData} from "@/shared";
 
 class TaskService {
 
     async getTask(id) {
         let task = await TaskData.getTask(id);
-        const weeklyTask = await scheduleData.getWeeklyTask(id)
+        const weeklyTask = await ScheduleData.getWeeklyTask(id)
         if (weeklyTask != null) {
-            task = Object.assign({}, task, {scheduleType: 'weekly', weeklySchedule: weeklyTask})
+            task = { ...task,
+                     scheduleModified: false,
+                     scheduleType: 'weekly',
+                     weeklySchedule: weeklyTask}
         } else {
             const weeklySchedule = {
+                paused: false,
                 sunday: 0,
                 monday: 0,
                 tuesday:0,
@@ -18,9 +22,20 @@ class TaskService {
                 friday: 0,
                 saturday: 0
             }
-            task = Object.assign({}, task, {scheduleType: 'none', weeklySchedule})
+            task = { ...task,
+                scheduleModified: false,
+                scheduleType: 'none',
+                weeklySchedule}
         }
         return task;
+    }
+
+    //TODO should keep track if schedule has changed
+    async updateTask(task) {
+        await TaskData.updateTask(task)
+        if (task.scheduleModified) {
+            await ScheduleData.updateWeeklyTask(task.id, task.weeklySchedule);
+        }
     }
 
 }

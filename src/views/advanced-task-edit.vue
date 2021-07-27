@@ -23,7 +23,8 @@
           <option value="pool">Pool</option>
           <option value="round-robin">Round Robing</option>
         </select>
-        <button class="ate-button">Clear From Schedule</button>
+        <button :disabled="!scheduleSet" class="ate-button margin-left-small">Pause</button>
+        <button :disabled="!scheduleSet" class="ate-button margin-left-small">Clear From Schedule</button>
       <div class="margin-left-small margin-top-small" v-if="task.scheduleType=='pool'">
         <label>Not implemented</label>
       </div>
@@ -74,6 +75,7 @@
     </div>
 
     <div class="ate-button-bar">
+      <button class="ate-button">Cancel</button>
       <button class="ate-button">Save</button>
     </div>
   </PageContent>
@@ -91,6 +93,20 @@ export default {
     return {
       taskService: {},
       task: {}
+    }
+  },
+  computed: {
+    scheduleSet() {
+      if (this.task.scheduleType === 'weekly') {
+        if (this.task.weeklySchedule.sunday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.monday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.tuesday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.wednesday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.thursday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.friday + '' !== '0') { return true }
+        if (this.task.weeklySchedule.saturday + '' !== '0') { return true }
+      }
+      return false;
     }
   },
   props: {

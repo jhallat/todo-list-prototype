@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import { SCHEDULE_API } from './config';
+import { SCHEDULE_API } from '../config';
 
 const getSchedules = async function() {
     try {
@@ -64,6 +64,15 @@ const getWeeklyTask = async function(taskId) {
     }
 }
 
+const updateWeeklyTask = async function(taskId, weeklyTask) {
+
+    const response = await axios.post(`${SCHEDULE_API}/weekly-tasks`, {
+     taskId,
+     ...weeklyTask
+    })
+    return response.status = 201;
+}
+
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
     if (!response.data) return [];
@@ -74,10 +83,11 @@ const parseList = response => {
     return list;
 }
 
-export const scheduleData = {
+export const ScheduleData = {
     getSchedules,
     addSchedule,
     addTask,
     getTasks,
-    getWeeklyTask
+    getWeeklyTask,
+    updateWeeklyTask
 }
