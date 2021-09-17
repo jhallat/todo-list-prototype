@@ -54,9 +54,9 @@ const addTask = async function(scheduleId, taskId, taskDescription, taskQuantity
     }
 }
 
-const getWeeklyTask = async function(taskId) {
+const getTaskSchedule = async function(taskId) {
     try {
-        const response = await axios.get(`${SCHEDULE_API}/weekly-tasks/${taskId}`)
+        const response = await axios.get(`${SCHEDULE_API}/v2/scheduled-task/${taskId}`)
         return response.data
     } catch (error) {
         console.error(error);
@@ -64,14 +64,12 @@ const getWeeklyTask = async function(taskId) {
     }
 }
 
-const updateWeeklyTask = async function(taskId, weeklyTask) {
+const updateTaskSchedule = async function(taskId, schedule) {
 
-    const response = await axios.post(`${SCHEDULE_API}/weekly-tasks`, {
-     taskId,
-     ...weeklyTask
-    })
-    return response.status = 201;
+    const response = await axios.put(`${SCHEDULE_API}/v2/scheduled-task/${taskId}`, schedule)
+    return response.status = 204;
 }
+
 
 const parseList = response => {
     if (response.status != 200) throw Error(response.message);
@@ -88,6 +86,6 @@ export const ScheduleData = {
     addSchedule,
     addTask,
     getTasks,
-    getWeeklyTask,
-    updateWeeklyTask
+    getTaskSchedule,
+    updateTaskSchedule
 }

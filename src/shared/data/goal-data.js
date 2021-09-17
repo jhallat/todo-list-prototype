@@ -12,6 +12,15 @@ const getGoals = async function() {
     }
 }
 
+const getGoal = async function(id) {
+    try {
+        const response = await axios.get(`${GOAL_API}/goals/${id}`);
+        return response.data;
+    } catch (error) {
+        return undefined;
+    }
+}
+
 const addGoal = async function(description) {
     const response = await axios.post(`${GOAL_API}/goals`,
         {
@@ -35,8 +44,9 @@ const parseList = response => {
     return list;
 }
 
-export const goalData = {
+export const GoalData = {
     getGoals,
     addGoal,
-    deleteGoal
+    deleteGoal,
+    getGoal
 }

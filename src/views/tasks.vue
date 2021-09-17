@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import {goalData, TaskData, ScheduleData} from "@/shared";
+import {GoalData, TaskData, ScheduleData} from "@/shared";
 import { ToDoData } from "@/shared/data";
 import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
@@ -204,7 +204,7 @@ export default {
       this.pendingTasks.splice(index, 1);
     },
     async loadGoals() {
-      this.goals = await goalData.getGoals();
+      this.goals = await GoalData.getGoals();
     },
     async onSelectedGoal() {
       const tasks = await TaskData.getTasks(this.selectedGoal);

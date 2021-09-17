@@ -46,7 +46,8 @@ const updateTask = async function(updatedTask) {
         {
             description: updatedTask.description,
             isOngoing: updatedTask.isOngoing,
-            isQuantifiable: updatedTask.isQuantifiable
+            isQuantifiable: updatedTask.isQuantifiable,
+            notes: updatedTask.notes
         })
     return response.status = 204;
 }
