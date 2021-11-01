@@ -16,11 +16,12 @@
         <div class="tdl-list" v-for="goal in filteredGoals" :key="goal.id">
           <Group :heading="goal.description">
             <div class="col-sm-12 col-md-6" v-for="(item) in goal.items" :key="item.id">
-              <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed"
+              <ToDoItem :description="item.description" :quantity="item.quantity" :selected="item.completed" :editable="goal.id > 0"
                         @delete="onDeleteItem(goal.id, item.id)"
                         @snooze="onSnoozeItem(goal.id, item.id)"
                         @select="onChangeCompletion(goal.id, item.id, $event)"
-                        @adjust="onAdjust(goal.id, item.id, $event)">
+                        @adjust="onAdjust(goal.id, item.id, $event)"
+                        @edit="onEditItem(goal.id, item.id)">
               </ToDoItem>
             </div>
           </Group>
@@ -105,8 +106,8 @@ export default {
     },
     async loadCompletionHistory() {
       const currentDate = new Date();
-      const start = dateUtilities.convertToYYYYMMDD(dateUtilities.addDays(currentDate, -7));
-      const end = dateUtilities.convertToYYYYMMDD(dateUtilities.addDays(currentDate, -1));
+      const start = dateUtilities.convertToStandard(dateUtilities.addDays(currentDate, -7));
+      const end = dateUtilities.convertToStandard(dateUtilities.addDays(currentDate, -1));
       const results = await ToDoData.getCompletionHistory(start, end);
       this.completionHistory = results.map(h => {
         return {
@@ -207,6 +208,11 @@ export default {
       const response = await this.toDoService.adjustQuantity(todoItem.id, adjustment);
       todoItem.quantity = response.quantity;
       todoItem.completed = response.completed;
+    },
+
+    onEditItem(goalId, todoId) {
+      const todoItem = this.findItem(goalId, todoId);
+      this.$router.push({name: 'advanced-edit', params: {id: todoItem.taskId }});
     }
   }
 }

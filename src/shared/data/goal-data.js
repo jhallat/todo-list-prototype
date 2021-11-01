@@ -1,9 +1,21 @@
 import * as axios from 'axios';
-import { GOAL_API} from "@/shared/config";
+import { TASK_MANAGEMENT_API } from "../config";
+
+const createAuthorizationHeader = () => {
+    const authToken = JSON.parse(localStorage.getItem('AuthObject'))
+    console.log(authToken.bearerToken);
+    const config = {
+        headers: {
+            'authorization': authToken.bearerToken
+        }
+    }
+    return config;
+}
 
 const getGoals = async function() {
+    const config = createAuthorizationHeader();
     try {
-        const response = await axios.get(`${GOAL_API}/goals`)
+        const response = await axios.get(`${TASK_MANAGEMENT_API}/goals`, config)
         let data = parseList(response);
         return data;
     } catch (error) {
@@ -13,8 +25,9 @@ const getGoals = async function() {
 }
 
 const getGoal = async function(id) {
+    const config = createAuthorizationHeader();
     try {
-        const response = await axios.get(`${GOAL_API}/goals/${id}`);
+        const response = await axios.get(`${TASK_MANAGEMENT_API}/goals/${id}`, config);
         return response.data;
     } catch (error) {
         return undefined;
@@ -22,15 +35,17 @@ const getGoal = async function(id) {
 }
 
 const addGoal = async function(description) {
-    const response = await axios.post(`${GOAL_API}/goals`,
+    const config = createAuthorizationHeader();
+    const response = await axios.post(`${TASK_MANAGEMENT_API}/goals`,
         {
             description
-        })
+        }, config)
     return response.data;
 }
 
 const deleteGoal = async function(id) {
-    const response = await axios.delete(`${GOAL_API}/goals/${id}`);
+    const config = createAuthorizationHeader();
+    const response = await axios.delete(`${TASK_MANAGEMENT_API}/goals/${id}`, config);
     return response.status = 204;
 }
 

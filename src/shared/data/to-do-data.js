@@ -1,9 +1,21 @@
 import * as axios from 'axios';
-import { TODO_API } from '../config';
+import { TASK_MANAGEMENT_API } from "../config";
+
+const createAuthorizationHeader = () => {
+    const authToken = JSON.parse(localStorage.getItem('AuthObject'))
+    console.log(authToken.bearerToken);
+    const config = {
+        headers: {
+            'authorization': authToken.bearerToken
+        }
+    }
+    return config;
+}
 
 const getToDo = async function() {
+    const config = createAuthorizationHeader()
     try {
-        const response = await axios.get(`${TODO_API}/todo/today`);
+        const response = await axios.get(`${TASK_MANAGEMENT_API}/checklist/today`, config);
         let data = parseList(response);
         return data;
     } catch (error) {
@@ -17,30 +29,34 @@ const addToDo = async function(description,
                                quantity = 1,
                                goalId = 0,
                                goalDescription = '') {
-    const response = await axios.post(`${TODO_API}/todo`,
+    const config = createAuthorizationHeader()
+    const response = await axios.post(`${TASK_MANAGEMENT_API}/checklist`,
         {
             description,
             taskId,
             quantity,
             goalId,
             goalDescription
-        })
+        }, config)
     return response.data;
 }
 
 const changeToDoCompletion = async function(id, completed, taskId) {
-    const response = await axios.put(`${TODO_API}/todo/${id}/completed`,
+    const config = createAuthorizationHeader()
+    const response = await axios.put(`${TASK_MANAGEMENT_API}/checklist/${id}/completed`,
         {
             completed,
             taskId
-        })
+        },
+        config)
     return response.status == 204;
 }
 
 const getCompletionHistory = async function(start, end) {
 
     try {
-        const response = await axios.get(`${TODO_API}/todo/history/completed/summary?start=${start}&end=${end}`)
+        const config = createAuthorizationHeader()
+        const response = await axios.get(`${TASK_MANAGEMENT_API}/checklist/history/completed/summary?start=${start}&end=${end}`, config)
         let data = parseList(response)
         return data;
     } catch (error) {
@@ -50,24 +66,29 @@ const getCompletionHistory = async function(start, end) {
 }
 
 const adjustQuantity = async function(id, adjustment) {
-    const response = await axios.post(`${TODO_API}/todo/quantity-adjustment`,
+    const config = createAuthorizationHeader()
+    const response = await axios.post(`${TASK_MANAGEMENT_API}/checklist/quantity-adjustment`,
         {
             id,
             adjustment
-        })
+        },
+        config)
     return response.data;
 }
 
 const deleteToDo = async function(id) {
-    const response = await axios.delete(`${TODO_API}/todo/${id}`);
+    const config = createAuthorizationHeader()
+    const response = await axios.delete(`${TASK_MANAGEMENT_API}/checklist/${id}`, config);
     return response.status == 204;
 }
 
 const snoozeToDo = async function(id, days) {
-    const response = await axios.post(`${TODO_API}/todo/${id}/snooze`,
+    const config = createAuthorizationHeader()
+    const response = await axios.post(`${TASK_MANAGEMENT_API}/checklist/${id}/snooze`,
         {
             days
-        });
+        },
+        config);
     return response.status == 204;
 }
 

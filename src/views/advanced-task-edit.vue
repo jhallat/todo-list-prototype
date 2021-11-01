@@ -67,6 +67,10 @@
           <label class="margin-left-x-small">Sat</label>
           <input class="ate-input" v-model="task.schedule.weekly.saturday"/>
         </div>
+        <div class="margin-left-medium ate-day-input">
+          <label class="margin-left-x-small">Max</label>
+          <input class="ate-input" v-model="task.schedule.weekly.max"/>
+        </div>
       </div>
     </Group>
     </div>
@@ -127,7 +131,6 @@ export default {
   async created() {
     this.taskService = TaskServiceFactory.getInstance();
     this.task = await this.taskService.getTask(this.id);
-    console.log("Adv Task Edit", JSON.stringify(this.task));
   },
   methods: {
     async saveTask() {

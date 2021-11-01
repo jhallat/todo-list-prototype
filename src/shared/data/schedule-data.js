@@ -1,9 +1,9 @@
 import * as axios from 'axios';
 import { SCHEDULE_API } from '../config';
 
-const getSchedules = async function() {
+const getSchedules = async function(start, end) {
     try {
-        const response = await axios.get(`${SCHEDULE_API}/schedules`)
+        const response = await axios.get(`${SCHEDULE_API}/schedule/range?start=${start}&end=${end}`)
         let data = parseList(response);
         return data;
 
@@ -56,7 +56,7 @@ const addTask = async function(scheduleId, taskId, taskDescription, taskQuantity
 
 const getTaskSchedule = async function(taskId) {
     try {
-        const response = await axios.get(`${SCHEDULE_API}/v2/scheduled-task/${taskId}`)
+        const response = await axios.get(`${SCHEDULE_API}/schedule/${taskId}`)
         return response.data
     } catch (error) {
         console.error(error);
@@ -65,8 +65,8 @@ const getTaskSchedule = async function(taskId) {
 }
 
 const updateTaskSchedule = async function(taskId, schedule) {
-
-    const response = await axios.put(`${SCHEDULE_API}/v2/scheduled-task/${taskId}`, schedule)
+    console.log(JSON.stringify(schedule));
+    const response = await axios.put(`${SCHEDULE_API}/schedule/${taskId}`, schedule)
     return response.status = 204;
 }
 

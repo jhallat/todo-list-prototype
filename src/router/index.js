@@ -5,6 +5,7 @@ import Goals from '../views/goals'
 import Tasks from '../views/tasks'
 import Schedule from '../views/schedule'
 import AdvancedEdit from '../views/advanced-task-edit'
+import Login from '../views/login'
 
 Vue.use(VueRouter)
 
@@ -38,6 +39,11 @@ const routes = [
     name: 'advanced-edit',
     component: AdvancedEdit,
     props: r => ({id: parseInt(r.params.id)})
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
   }
 ]
 

@@ -10,6 +10,13 @@ const convertToYYYYMMDD = (date) => {
     return `${year}${padding(month + 1)}${padding(day)}`;
 }
 
+const convertToStandard = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    return `${year}-${padding(month + 1)}-${padding(day)}`;
+}
+
 const convertYYYYMMDDtoDate = (value) => {
     if (value.length != 8) {
         return null;
@@ -56,5 +63,6 @@ export const dateUtilities = {
     convertToYYYYMMDD,
     convertYYYYMMDDtoDate,
     addDays,
-    getAbrrDayName
+    getAbrrDayName,
+    convertToStandard
 }

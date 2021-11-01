@@ -3,7 +3,7 @@
     <div :hidden="!task.isQuantifiable">
       <input class="tkp-quantity-input" placeholder="1" v-model="quantity" maxlength="3" size="3">
     </div>
-    <div class="no-wrap">
+    <div class="no-wrap tkp-description" @click="onClickEdit">
       {{ task.description }}
     </div>
     <div :hidden="!task.isOngoing" class="tkp-decoration">
@@ -13,7 +13,7 @@
       <font-awesome-icon icon="hashtag"/>
     </div>
     <div class="tkp-icon-bar">
-      <IconBar icons="delete, edit, schedule, start" @clickIcon = "onClickIcon($event)"></IconBar>
+      <IconBar icons="delete, schedule, start" @clickIcon = "onClickIcon($event)"></IconBar>
     </div>
   </div>
 </template>
@@ -34,6 +34,9 @@ export default {
     }
   },
   methods: {
+    onClickEdit() {
+      this.$emit('edit');
+    },
     onClickIcon(value) {
       if (value == 'start') {
         this.$emit('start', this.quantity);
@@ -54,6 +57,14 @@ export default {
     .tkp-icon-bar {
       visibility: visible;
     }
+  }
+}
+
+.tkp-description {
+  &:hover {
+    color: $primary-color;
+    text-decoration: underline;
+    cursor: pointer;
   }
 }
 

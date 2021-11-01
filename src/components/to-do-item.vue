@@ -7,8 +7,8 @@
       <input type="text" placeholder="1" maxlength="3" v-model="adjustment"/>
       <button class="adjust-button" @click="onAdjust">-</button>
     </div>
-    <div class="no-wrap">
-      {{ generateLabel(description, quantity) }}
+    <div class="no-wrap" :class="{ 'tdi-editable': editable }" @click = "onEdit">
+      <QualifiedLabel :description="description" :quantity="quantity" />
     </div>
     <div class="tdi-icon-bar">
       <IconBar icons="snooze, delete" @clickIcon = "onClickIcon($event)"></IconBar>
@@ -19,9 +19,10 @@
 <script>
 import CheckBox from "@/components/check-box";
 import IconBar from "@/components/icon-bar";
+import QualifiedLabel from "@/components/quantified-label";
 export default {
   name: 'ToDoItem',
-  components: {IconBar, CheckBox},
+  components: {QualifiedLabel, IconBar, CheckBox},
   props: {
     description: {
       type: String,
@@ -33,6 +34,11 @@ export default {
       }
     },
     selected: {
+      default: () => {
+        return false;
+      }
+    },
+    editable: {
       default: () => {
         return false;
       }
@@ -78,6 +84,11 @@ export default {
     onAdjust() {
       this.$emit("adjust", this.adjustment);
       this.adjustment = '';
+    },
+    onEdit() {
+      if (this.editable) {
+        this.$emit("edit");
+      }
     }
   }
 }
@@ -108,6 +119,14 @@ export default {
 .tooltip {
   padding-right: 5px;
   font-size: 12px;
+}
+
+.tdi-editable {
+  &:hover {
+    color: $primary-color;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 .tdi-adjust {

@@ -1,24 +1,27 @@
 <template>
   <PageContent title="Tasks">
 
-      <!-- Select a goal -->
-      <div class="goal-selection">
-        <label class="margin-right-small">Goal</label>
-        <select v-model="selectedGoal" @change="onSelectedGoal">
-          <option v-for="(goal) in goals" :value="goal.id" :key="goal.id">
-            {{ goal.description }}
-          </option>
-        </select>
-      </div>
+    <!-- Select a goal -->
+    <div class="goal-selection margin-left-small margin-top-small">
+      <label class="margin-right-small">Goal</label>
+      <select v-model="selectedGoal" @change="onSelectedGoal">
+        <option v-for="(goal) in goals" :value="goal.id" :key="goal.id">
+          {{ goal.description }}
+        </option>
+      </select>
+    </div>
 
-      <!-- Add or Edit a task -->
+    <!-- Add or Edit a task -->
+    <div class="margin-left-small margin-top-small">
       <TaskEdit :task="editTask" :edit-mode="editMode"
                 @cancel="onCancelEdit"
                 @add="onAddItem($event)"
                 @edit="onEditItem($event)"
                 @advanced="onAdvanced($event)"></TaskEdit>
+    </div>
 
-      <!-- Pending items section -->
+    <!-- Pending items section -->
+    <div class="margin-left-small margin-top-small">
       <ListSection heading="Pending">
         <div class="col-sm-12 col-md-6" v-for="(task, index) in pendingTasks" :key="task.id">
           <TaskItem :task="task" @delete="onDeleteItem(index)"
@@ -27,29 +30,35 @@
                     @schedule="onSchedule(index)"/>
         </div>
       </ListSection>
+    </div>
 
-      <!-- In progress section -->
+    <!-- In progress section -->
+    <div class="margin-left-small margin-top-small">
       <ListSection heading="In Progress">
-          <div class="task col-sm-12 col-md-6" v-for="(task) in inProgressTasks" :key="task.id">
-            <PendingTaskItem :task="task" @edit="onSelectForEdit(task.id)"/>
-          </div>
+        <div class="task col-sm-12 col-md-6" v-for="(task) in inProgressTasks" :key="task.id">
+          <PendingTaskItem :task="task" @edit="onSelectForEdit(task.id)"/>
+        </div>
       </ListSection>
+    </div>
 
-      <!-- Completed section -->
+    <!-- Completed section -->
+    <div class="margin-left-small margin-top-small">
       <ListSection heading="Completed">
-          <div class="task col-sm-12 col-md-6" v-for="(task) in completedTasks" :key="task.id">
-            {{ task.description }}
-          </div>
+        <div class="task col-sm-12 col-md-6" v-for="(task) in completedTasks" :key="task.id">
+          {{ task.description }}
+        </div>
       </ListSection>
+    </div>
     <div v-if="displayScheduleDialog">
-      <ScheduleDialog :schedules="schedules" @dialogOk="onScheduleSelect" @dialogCancel="onScheduleCancel"></ScheduleDialog>
+      <ScheduleDialog :schedules="schedules" @dialogOk="onScheduleSelect"
+                      @dialogCancel="onScheduleCancel"></ScheduleDialog>
     </div>
   </PageContent>
 </template>
 
 <script>
 import {GoalData, TaskData, ScheduleData} from "@/shared";
-import { ToDoData } from "@/shared/data";
+import {ToDoData} from "@/shared/data";
 import ScheduleDialog from "@/components/schedule-dialog";
 import TaskItem from "@/components/task-item";
 import TaskEdit from "@/components/task-edit";
@@ -111,7 +120,7 @@ export default {
     },
     onScheduleSelect(scheduleId) {
       const task = this.taskToSchedule;
-      ScheduleData.addTask(scheduleId, task.id, task.description,  parseInt(task.quantity));
+      ScheduleData.addTask(scheduleId, task.id, task.description, parseInt(task.quantity));
       this.displayScheduleDialog = false;
       this.taskToSchedule = EMPTY_TASK;
     },
@@ -163,7 +172,7 @@ export default {
       this.editMode = 'add';
     },
     onAdvanced(task) {
-      this.$router.push({name: 'advanced-edit', params: {id: task.id }})
+      this.$router.push({name: 'advanced-edit', params: {id: task.id}})
     },
     onCancelEdit() {
       this.editTask.id = 0;
@@ -175,19 +184,24 @@ export default {
     onSelectForEdit(id) {
       this.editMode = 'edit';
       let task = undefined;
-      { const index = this.pendingTasks.findIndex(item => item.id === parseInt(id));
+      {
+        const index = this.pendingTasks.findIndex(item => item.id === parseInt(id));
         if (index >= 0) {
           task = this.pendingTasks[index];
-      }}
-      { const index = this.inProgressTasks.findIndex(item => item.id === parseInt(id));
+        }
+      }
+      {
+        const index = this.inProgressTasks.findIndex(item => item.id === parseInt(id));
         if (index >= 0) {
           task = this.inProgressTasks[index];
-      }}
+        }
+      }
       if (task !== undefined) {
-        this.editTask.id = task.id;
-        this.editTask.description = task.description;
-        this.editTask.isOngoing = task.isOngoing;
-        this.editTask.isQuantifiable = task.isQuantifiable;
+        this.onAdvanced(task);
+        //this.editTask.id = task.id;
+        //this.editTask.description = task.description;
+        //this.editTask.isOngoing = task.isOngoing;
+        //this.editTask.isQuantifiable = task.isQuantifiable;
       }
     },
     onDeleteItem(index) {
@@ -199,7 +213,7 @@ export default {
       const task = this.pendingTasks[index]
       const goal = this.goals.find(item => item.id == this.selectedGoal);
       ToDoData.addToDo(task.description, task.id, quantity, goal.id, goal.description);
-      task.status.key="IN_PROGRESS";
+      task.status.key = "IN_PROGRESS";
       this.inProgressTasks.push(task);
       this.pendingTasks.splice(index, 1);
     },

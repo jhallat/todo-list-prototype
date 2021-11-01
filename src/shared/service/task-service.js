@@ -10,7 +10,6 @@ class TaskService {
         const schedule = await ScheduleData.getTaskSchedule(id)
         task = { ...task,
                  schedule }
-        console.log(task);
         return task;
     }
 
@@ -18,7 +17,7 @@ class TaskService {
         await TaskData.updateTask(task)
         task.schedule.taskId = task.id;
         task.schedule.description = task.description;
-        task.schedule.quantfifable = task.quantfifable;
+        task.schedule.quantifiable = task.isQuantifiable;
         task.schedule.goalId = task.goalId;
         task.schedule.goalDescription = task.goalDescription;
         if (task.schedule && task.schedule.weekly) {
@@ -29,6 +28,7 @@ class TaskService {
             task.schedule.weekly.thursday = parseInt(task.schedule.weekly.thursday)
             task.schedule.weekly.friday = parseInt(task.schedule.weekly.friday)
             task.schedule.weekly.saturday = parseInt(task.schedule.weekly.saturday)
+            task.schedule.weekly.max = parseInt(task.schedule.weekly.max)
         }
         await ScheduleData.updateTaskSchedule(task.id, task.schedule);
     }
